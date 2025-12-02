@@ -1,0 +1,174 @@
+import React, { useState } from 'react';
+import { ArrowRightLeft, Check, KeyRound, TableProperties, Plus, Trash2 } from 'lucide-react';
+import { clsx } from 'clsx';
+
+interface ColumnMapperProps {
+    masterHeaders: string[];
+    comparisonHeaders: string[];
+    onConfirm: (mapping: MappingConfig) => void;
+    onBack: () => void;
+}
+
+export interface MappingConfig {
+    masterKey: string;
+    comparisonKey: string;
+    valueColumns: { master: string; comparison: string }[];
+}
+
+export const ColumnMapper: React.FC<ColumnMapperProps> = ({
+    masterHeaders,
+    comparisonHeaders,
+    onConfirm,
+    onBack
+}) => {
+    const [masterKey, setMasterKey] = useState<string>('');
+    const [comparisonKey, setComparisonKey] = useState<string>('');
+    const [valueMappings, setValueMappings] = useState<{ master: string; comparison: string }[]>([]);
+
+    const handleAddValueMapping = () => {
+        setValueMappings([...valueMappings, { master: '', comparison: '' }]);
+    };
+
+    const updateValueMapping = (index: number, type: 'master' | 'comparison', value: string) => {
+        const newMappings = [...valueMappings];
+        newMappings[index] = { ...newMappings[index], [type]: value };
+        setValueMappings(newMappings);
+    };
+
+    const removeValueMapping = (index: number) => {
+        setValueMappings(valueMappings.filter((_, i) => i !== index));
+    };
+
+    const isValid = masterKey && comparisonKey && valueMappings.length > 0 && valueMappings.every(m => m.master && m.comparison);
+
+    return (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-full max-h-[800px] animate-in fade-in zoom-in-95 duration-300">
+            <div className="p-6 border-b border-slate-200 bg-slate-50">
+                <h3 className="text-lg font-bold text-slate-900">列のマッピング設定</h3>
+                <p className="text-sm text-slate-500 mt-1">データを照合するための「キー項目」と、比較したい「値の項目」を選択してください。</p>
+            </div>
+
+            <div className="p-8 overflow-auto flex-1 space-y-10">
+                {/* Key Selection Section */}
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-indigo-600 font-bold text-lg">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                            <KeyRound className="w-5 h-5" />
+                        </div>
+                        <h4>1. キー項目（一意のID）を選択</h4>
+                    </div>
+                    <p className="text-sm text-slate-500 ml-10">社員番号や氏名など、行を一意に特定できる項目を選んでください。</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-indigo-50/30 rounded-2xl border border-indigo-100 ml-2">
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">マスター側のキー</label>
+                            <select
+                                value={masterKey}
+                                onChange={(e) => setMasterKey(e.target.value)}
+                                className="w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2.5"
+                            >
+                                <option value="">選択してください...</option>
+                                {masterHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">照合データ側のキー</label>
+                            <select
+                                value={comparisonKey}
+                                onChange={(e) => setComparisonKey(e.target.value)}
+                                className="w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2.5"
+                            >
+                                <option value="">選択してください...</option>
+                                {comparisonHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Value Mapping Section */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-emerald-600 font-bold text-lg">
+                            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                <TableProperties className="w-5 h-5" />
+                            </div>
+                            <h4>2. 比較する項目を選択</h4>
+                        </div>
+                        <button
+                            onClick={handleAddValueMapping}
+                            className="px-4 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            項目を追加
+                        </button>
+                    </div>
+
+                    <div className="space-y-3 ml-2">
+                        {valueMappings.map((mapping, index) => (
+                            <div key={index} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm group hover:border-emerald-200 transition-colors">
+                                <div className="flex-1">
+                                    <label className="block text-xs font-medium text-slate-500 mb-1">マスター側の項目</label>
+                                    <select
+                                        value={mapping.master}
+                                        onChange={(e) => updateValueMapping(index, 'master', e.target.value)}
+                                        className="w-full rounded-lg border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                                    >
+                                        <option value="">選択...</option>
+                                        {masterHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                    </select>
+                                </div>
+                                <ArrowRightLeft className="w-5 h-5 text-slate-300 flex-shrink-0 mt-5" />
+                                <div className="flex-1">
+                                    <label className="block text-xs font-medium text-slate-500 mb-1">照合データ側の項目</label>
+                                    <select
+                                        value={mapping.comparison}
+                                        onChange={(e) => updateValueMapping(index, 'comparison', e.target.value)}
+                                        className="w-full rounded-lg border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                                    >
+                                        <option value="">選択...</option>
+                                        {comparisonHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                                    </select>
+                                </div>
+                                <button
+                                    onClick={() => removeValueMapping(index)}
+                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all mt-5"
+                                    title="削除"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            </div>
+                        ))}
+                        {valueMappings.length === 0 && (
+                            <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                                <p className="text-slate-500 font-medium">比較する項目がまだありません</p>
+                                <p className="text-sm text-slate-400 mt-1">右上の「項目を追加」ボタンを押して設定してください</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-200 bg-slate-50 flex justify-end gap-4">
+                <button
+                    onClick={onBack}
+                    className="px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors"
+                >
+                    戻る
+                </button>
+                <button
+                    onClick={() => onConfirm({ masterKey, comparisonKey, valueColumns: valueMappings })}
+                    disabled={!isValid}
+                    className={clsx(
+                        "px-8 py-3 text-sm font-bold text-white rounded-xl transition-all flex items-center gap-2 shadow-sm",
+                        isValid
+                            ? "bg-indigo-600 hover:bg-indigo-700 hover:shadow-md hover:-translate-y-0.5"
+                            : "bg-slate-300 cursor-not-allowed"
+                    )}
+                >
+                    <Check className="w-5 h-5" />
+                    照合を開始する
+                </button>
+            </div>
+        </div>
+    );
+};
