@@ -8,12 +8,14 @@ interface VerificationDashboardProps {
     results: ReconciliationResult[];
     onUpdateResults: (newResults: ReconciliationResult[]) => void;
     onReset: () => void;
+    onBack: () => void;
 }
 
 export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
     results,
     onUpdateResults,
-    onReset
+    onReset,
+    onBack
 }) => {
     const [filter, setFilter] = useState<'ALL' | 'MISMATCH' | 'MISSING' | 'VERIFIED'>('ALL');
     const [searchTerm, setSearchTerm] = useState('');
@@ -137,6 +139,13 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                             className="w-full pl-9 pr-4 py-2 rounded-lg border-slate-200 text-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors"
                         />
                     </div>
+                    <button
+                        onClick={onBack}
+                        className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                    >
+                        <RotateCcw className="w-4 h-4 rotate-180" /> {/* Flip icon for back */}
+                        戻る
+                    </button>
                     <button
                         onClick={onReset}
                         className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"

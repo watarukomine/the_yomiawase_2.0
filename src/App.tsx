@@ -400,6 +400,7 @@ function App() {
             results={results}
             onUpdateResults={setResults}
             onReset={handleReset}
+            onBack={() => setStep('MAPPING')}
           />
         )}
       </main>
