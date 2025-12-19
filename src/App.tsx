@@ -3,12 +3,13 @@ import { FileSpreadsheet, ArrowRight, Check } from 'lucide-react';
 import { FileUpload } from './components/FileUpload';
 import { DataIngestion } from './components/DataIngestion';
 import { ColumnMapper, type MappingConfig } from './components/ColumnMapper';
+import { HeaderReview } from './components/HeaderReview';
 import { VerificationDashboard } from './components/VerificationDashboard';
 import { parseExcelFile, type RawSheetData } from './utils/excelParser';
 import { reconcileData, type ReconciliationResult } from './utils/reconciliation';
 import { clsx } from 'clsx';
 
-type Step = 'UPLOAD' | 'HEADER_MASTER' | 'HEADER_COMPARISON' | 'MAPPING' | 'RESULTS';
+type Step = 'UPLOAD' | 'HEADER_MASTER' | 'REVIEW_MASTER' | 'HEADER_COMPARISON' | 'REVIEW_COMPARISON' | 'MAPPING' | 'RESULTS';
 
 const STEPS = [
   { id: 'UPLOAD', label: 'ファイル選択' },
@@ -22,29 +23,36 @@ function App() {
   const [step, setStep] = useState<Step>('UPLOAD');
 
   // File State
-  const [masterFile, setMasterFile] = useState<File | null>(null);
-  const [comparisonFile, setComparisonFile] = useState<File | null>(null);
+  const [masterFiles, setMasterFiles] = useState<File[]>([]);
+  const [comparisonFiles, setComparisonFiles] = useState<File[]>([]);
 
   // Data State
-  const [masterRawData, setMasterRawData] = useState<RawSheetData>([]);
-  const [comparisonRawData, setComparisonRawData] = useState<RawSheetData>([]);
+  const [masterRawData, setMasterRawData] = useState<RawSheetData[]>([]);
+  const [comparisonRawData, setComparisonRawData] = useState<RawSheetData[]>([]);
 
   // Header State
   const [masterHeaders, setMasterHeaders] = useState<string[]>([]);
   const [comparisonHeaders, setComparisonHeaders] = useState<string[]>([]);
+  const [masterRowIndices, setMasterRowIndices] = useState<number[]>([]);
+  const [comparisonRowIndices, setComparisonRowIndices] = useState<number[]>([]);
+
+  // Preview State (for editing individual file headers)
+  const [activePreviewFileIndex, setActivePreviewFileIndex] = useState<number | null>(null);
 
   // Results State
   const [results, setResults] = useState<ReconciliationResult[]>([]);
 
-  const handleFileUpload = async (file: File, type: 'master' | 'comparison') => {
+  const handleFileUpload = async (files: File[], type: 'master' | 'comparison') => {
     try {
-      const data = await parseExcelFile(file);
+      const dataPromises = files.map(file => parseExcelFile(file));
+      const allData = await Promise.all(dataPromises);
+
       if (type === 'master') {
-        setMasterFile(file);
-        setMasterRawData(data);
+        setMasterFiles(files);
+        setMasterRawData(allData);
       } else {
-        setComparisonFile(file);
-        setComparisonRawData(data);
+        setComparisonFiles(files);
+        setComparisonRawData(allData);
       }
     } catch (error) {
       console.error("Error parsing file:", error);
@@ -53,35 +61,139 @@ function App() {
   };
 
   const startProcess = () => {
-    if (masterFile && comparisonFile) {
+    if (masterFiles.length > 0 && comparisonFiles.length > 0) {
       setStep('HEADER_MASTER');
     }
   };
 
+
+  // Helper to find the best matching header row index
+  const findHeaderRow = (dataset: RawSheetData, targetHeaders: string[]): number => {
+    // Scan first 50 rows
+    for (let i = 0; i < Math.min(dataset.length, 50); i++) {
+      const row = dataset[i];
+      if (!row) continue;
+
+      const rowStrings = row.map(cell => String(cell || '').trim());
+      // Check if this row contains a meaningful number of our target headers
+      const matchCount = targetHeaders.filter(h => rowStrings.includes(h)).length;
+
+      // If > 70% of headers match, assume this is the header row
+      if (matchCount > 0 && matchCount / targetHeaders.length > 0.7) {
+        return i;
+      }
+    }
+    return -1; // Not found
+  };
+
   const handleHeaderConfirm = (type: 'master' | 'comparison', rowIndex: number, headers: string[]) => {
+    // If we are editing a specific file in Review mode
+    if (activePreviewFileIndex !== null) {
+      if (type === 'master') {
+        const newIndices = [...masterRowIndices];
+        newIndices[activePreviewFileIndex] = rowIndex;
+        setMasterRowIndices(newIndices);
+        setActivePreviewFileIndex(null); // Return to review
+      } else {
+        const newIndices = [...comparisonRowIndices];
+        newIndices[activePreviewFileIndex] = rowIndex;
+        setComparisonRowIndices(newIndices);
+        setActivePreviewFileIndex(null); // Return to review
+      }
+      return;
+    }
+
+    // Normal flow (First file selection)
     if (type === 'master') {
       setMasterHeaders(headers);
-      const dataRows = masterRawData.slice(rowIndex + 1).map(row => {
-        const obj: any = {};
-        headers.forEach((h, i) => {
-          obj[h] = row[i];
-        });
-        return obj;
+
+      const newIndices = masterRawData.map((dataset, idx) => {
+        if (idx === 0) return rowIndex;
+        const detected = findHeaderRow(dataset, headers);
+        return detected !== -1 ? detected : rowIndex;
       });
-      setMasterProcessedData(dataRows);
-      setStep('HEADER_COMPARISON');
+      setMasterRowIndices(newIndices);
+
+      if (masterFiles.length > 1) {
+        setStep('REVIEW_MASTER');
+      } else {
+        processMasterData(newIndices, headers); // Proceed directly
+      }
+
     } else {
       setComparisonHeaders(headers);
-      const dataRows = comparisonRawData.slice(rowIndex + 1).map(row => {
+
+      const newIndices = comparisonRawData.map((dataset, idx) => {
+        if (idx === 0) return rowIndex;
+        const detected = findHeaderRow(dataset, headers);
+        return detected !== -1 ? detected : rowIndex;
+      });
+      setComparisonRowIndices(newIndices);
+
+      if (comparisonFiles.length > 1) {
+        setStep('REVIEW_COMPARISON');
+      } else {
+        processComparisonData(newIndices, headers); // Proceed directly
+      }
+    }
+  };
+
+  const processMasterData = (indices: number[], headers: string[]) => {
+    // Process all master files
+    const dataRows = masterRawData.flatMap((dataset, idx) => {
+      const startIndex = indices[idx];
+      return dataset.slice(startIndex + 1).map(row => {
         const obj: any = {};
-        headers.forEach((h, i) => {
-          obj[h] = row[i];
-        });
+
+        if (idx > 0) {
+          // Re-map by column name if we are treating this as a separate file structure
+          const fileHeaders = dataset[startIndex].map(c => String(c || '').trim());
+          headers.forEach(h => {
+            const colIdx = fileHeaders.indexOf(h);
+            if (colIdx !== -1) {
+              obj[h] = row[colIdx];
+            }
+          });
+        } else {
+          // First file: use the index from the selection
+          headers.forEach((h, i) => {
+            obj[h] = row[i];
+          });
+        }
         return obj;
       });
-      setComparisonProcessedData(dataRows);
-      setStep('MAPPING');
-    }
+    });
+
+    setMasterProcessedData(dataRows);
+    setStep('HEADER_COMPARISON');
+  };
+
+  const processComparisonData = (indices: number[], headers: string[]) => {
+    // Process all comparison files
+    const dataRows = comparisonRawData.flatMap((dataset, idx) => {
+      const startIndex = indices[idx];
+      return dataset.slice(startIndex + 1).map(row => {
+        const obj: any = {};
+
+        if (idx > 0) {
+          const fileHeaders = dataset[startIndex].map(c => String(c || '').trim());
+          headers.forEach(h => {
+            const colIdx = fileHeaders.indexOf(h);
+            if (colIdx !== -1) {
+              obj[h] = row[colIdx];
+            }
+          });
+        } else {
+          headers.forEach((h, i) => {
+            obj[h] = row[i];
+          });
+        }
+        return obj;
+      });
+    });
+
+    setComparisonProcessedData(dataRows);
+    setStep('MAPPING');
   };
 
   const [masterProcessedData, setMasterProcessedData] = useState<any[]>([]);
@@ -96,12 +208,15 @@ function App() {
   const handleReset = () => {
     if (confirm('最初からやり直しますか？現在の作業内容は失われます。')) {
       setStep('UPLOAD');
-      setMasterFile(null);
-      setComparisonFile(null);
+      setMasterFiles([]);
+      setComparisonFiles([]);
       setMasterRawData([]);
       setComparisonRawData([]);
       setMasterHeaders([]);
       setComparisonHeaders([]);
+      setMasterRowIndices([]);
+      setComparisonRowIndices([]);
+      setActivePreviewFileIndex(null);
       setResults([]);
     }
   };
@@ -178,17 +293,17 @@ function App() {
               <FileUpload
                 label="マスターデータ (正)"
                 subLabel="人事システム等の信頼できるデータ"
-                file={masterFile}
-                onFileSelect={(f) => handleFileUpload(f, 'master')}
-                onClear={() => setMasterFile(null)}
+                files={masterFiles}
+                onFilesSelect={(f) => handleFileUpload(f, 'master')}
+                onClear={() => setMasterFiles([])}
                 color="blue"
               />
               <FileUpload
                 label="照合データ (副)"
                 subLabel="銀行振込ファイル等のチェック対象"
-                file={comparisonFile}
-                onFileSelect={(f) => handleFileUpload(f, 'comparison')}
-                onClear={() => setComparisonFile(null)}
+                files={comparisonFiles}
+                onFilesSelect={(f) => handleFileUpload(f, 'comparison')}
+                onClear={() => setComparisonFiles([])}
                 color="emerald"
               />
             </div>
@@ -196,10 +311,10 @@ function App() {
             <div className="flex justify-center pt-8">
               <button
                 onClick={startProcess}
-                disabled={!masterFile || !comparisonFile}
+                disabled={masterFiles.length === 0 || comparisonFiles.length === 0}
                 className={clsx(
                   "px-8 py-4 rounded-xl font-bold text-white shadow-lg transition-all flex items-center gap-3 text-lg",
-                  masterFile && comparisonFile
+                  masterFiles.length > 0 && comparisonFiles.length > 0
                     ? "bg-indigo-600 hover:bg-indigo-700 hover:shadow-xl hover:-translate-y-1"
                     : "bg-slate-300 cursor-not-allowed"
                 )}
@@ -212,19 +327,62 @@ function App() {
 
         {step === 'HEADER_MASTER' && (
           <DataIngestion
-            title="マスターデータ (正)"
-            data={masterRawData}
+            title={`マスターデータ (正) - ${masterFiles.length}ファイル`}
+            data={masterRawData[0] || []}
             onConfirm={(idx, headers) => handleHeaderConfirm('master', idx, headers)}
             onCancel={() => setStep('UPLOAD')}
           />
         )}
 
+        {step === 'REVIEW_MASTER' && activePreviewFileIndex === null && (
+          <HeaderReview
+            title="マスターデータ (正)"
+            files={masterFiles}
+            rowIndices={masterRowIndices}
+            onEdit={setActivePreviewFileIndex}
+            onConfirm={() => processMasterData(masterRowIndices, masterHeaders)}
+            onBack={() => setStep('HEADER_MASTER')}
+          />
+        )}
+
+        {step === 'REVIEW_MASTER' && activePreviewFileIndex !== null && (
+          <DataIngestion
+            title={`マスターデータ (正) - ${masterFiles[activePreviewFileIndex].name}`}
+            data={masterRawData[activePreviewFileIndex] || []}
+            // Use existing header/index or default?
+            // Ideally should highlight current selection. DataIngestion doesn't support forcing selection yet easily,
+            // but we can just let user pick.
+            onConfirm={(idx) => handleHeaderConfirm('master', idx, masterHeaders)} // Headers shouldn't change, but we pass them back
+            onCancel={() => setActivePreviewFileIndex(null)}
+          />
+        )}
+
         {step === 'HEADER_COMPARISON' && (
           <DataIngestion
-            title="照合データ (副)"
-            data={comparisonRawData}
+            title={`照合データ (副) - ${comparisonFiles.length}ファイル`}
+            data={comparisonRawData[0] || []}
             onConfirm={(idx, headers) => handleHeaderConfirm('comparison', idx, headers)}
             onCancel={() => setStep('HEADER_MASTER')}
+          />
+        )}
+
+        {step === 'REVIEW_COMPARISON' && activePreviewFileIndex === null && (
+          <HeaderReview
+            title="照合データ (副)"
+            files={comparisonFiles}
+            rowIndices={comparisonRowIndices}
+            onEdit={setActivePreviewFileIndex}
+            onConfirm={() => processComparisonData(comparisonRowIndices, comparisonHeaders)}
+            onBack={() => setStep('HEADER_COMPARISON')}
+          />
+        )}
+
+        {step === 'REVIEW_COMPARISON' && activePreviewFileIndex !== null && (
+          <DataIngestion
+            title={`照合データ (副) - ${comparisonFiles[activePreviewFileIndex].name}`}
+            data={comparisonRawData[activePreviewFileIndex] || []}
+            onConfirm={(idx) => handleHeaderConfirm('comparison', idx, comparisonHeaders)}
+            onCancel={() => setActivePreviewFileIndex(null)}
           />
         )}
 

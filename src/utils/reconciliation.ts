@@ -48,7 +48,29 @@ export const reconcileData = (
 
                 // Simple equality check for now. Can be enhanced with fuzzy matching or numeric normalization later.
                 // Normalizing to string for comparison to handle number vs string issues
-                const isMatch = String(mVal ?? '').trim() === String(cVal ?? '').trim();
+                let isMatch = false;
+
+                if (mapping.treatMissingAsZero) {
+                    // Helper to convert to number or 0 if missing/empty
+                    const toNum = (val: any) => {
+                        if (val === null || val === undefined || val === '') return 0;
+                        const num = Number(val);
+                        return isNaN(num) ? val : num; // Return original if not a number
+                    };
+
+                    const mNum = toNum(mVal);
+                    const cNum = toNum(cVal);
+
+                    if (typeof mNum === 'number' && typeof cNum === 'number') {
+                        // Numeric comparison with small epsilon for floats if needed, but exact for equality usually fine for this App
+                        isMatch = mNum === cNum;
+                    } else {
+                        // Fallback to string comparison if one is non-numeric text
+                        isMatch = String(mNum).trim() === String(cNum).trim();
+                    }
+                } else {
+                    isMatch = String(mVal ?? '').trim() === String(cVal ?? '').trim();
+                }
 
                 return {
                     columnName: `${col.master} / ${col.comparison}`,

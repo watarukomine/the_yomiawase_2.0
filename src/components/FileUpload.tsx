@@ -5,8 +5,8 @@ import { clsx } from 'clsx';
 interface FileUploadProps {
     label: string;
     subLabel?: string;
-    file: File | null;
-    onFileSelect: (file: File) => void;
+    files: File[];
+    onFilesSelect: (files: File[]) => void;
     onClear: () => void;
     color?: 'blue' | 'emerald';
 }
@@ -14,26 +14,30 @@ interface FileUploadProps {
 export const FileUpload: React.FC<FileUploadProps> = ({
     label,
     subLabel,
-    file,
-    onFileSelect,
+    files,
+    onFilesSelect,
     onClear,
     color = 'blue'
 }) => {
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
-        const droppedFile = e.dataTransfer.files[0];
-        if (droppedFile && (droppedFile.name.endsWith('.xlsx') || droppedFile.name.endsWith('.csv') || droppedFile.name.endsWith('.xls'))) {
-            onFileSelect(droppedFile);
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        const validFiles = droppedFiles.filter(f =>
+            f.name.endsWith('.xlsx') || f.name.endsWith('.csv') || f.name.endsWith('.xls')
+        );
+
+        if (validFiles.length > 0) {
+            onFilesSelect(validFiles);
         }
-    }, [onFileSelect]);
+    }, [onFilesSelect]);
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            onFileSelect(e.target.files[0]);
+        if (e.target.files && e.target.files.length > 0) {
+            onFilesSelect(Array.from(e.target.files));
         }
     };
 
@@ -43,7 +47,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     return (
         <div className="w-full h-full">
-            {!file ? (
+            {files.length === 0 ? (
                 <div
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
@@ -57,6 +61,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                         type="file"
                         className="hidden"
                         accept=".xlsx,.xls,.csv"
+                        multiple
                         onChange={handleChange}
                         id={`file-upload-${label}`}
                     />
@@ -70,32 +75,43 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                         <h3 className="text-lg font-bold text-slate-800 mb-1">{label}</h3>
                         {subLabel && <p className="text-sm text-slate-500 mb-4">{subLabel}</p>}
                         <div className="px-4 py-2 bg-slate-100 rounded-lg text-xs font-medium text-slate-600 group-hover:bg-slate-200 transition-colors">
-                            クリックして選択 または ドラッグ＆ドロップ
+                            クリックして選択 または ドラッグ＆ドロップ（複数可）
                         </div>
                         <p className="text-[10px] text-slate-400 mt-2">対応形式: .xlsx, .xls, .csv</p>
                     </label>
                 </div>
             ) : (
                 <div className={clsx(
-                    "h-full min-h-[200px] flex flex-col items-center justify-center p-8 rounded-2xl border-2 transition-all",
+                    "h-full min-h-[200px] flex flex-col items-center justify-center p-8 rounded-2xl border-2 transition-all relative",
                     themeColor
                 )}>
+                    <button
+                        onClick={onClear}
+                        className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white rounded-full transition-colors"
+                        title="ファイルを削除"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+
                     <div className="relative mb-4">
                         <FileSpreadsheet className={clsx("w-16 h-16", iconColor)} />
                         <div className="absolute -right-2 -top-2 bg-white rounded-full p-1 shadow-sm">
                             <CheckCircleIcon className={clsx("w-6 h-6", iconColor)} />
                         </div>
                     </div>
-                    <h3 className="text-lg font-bold mb-1 text-center break-all">{file.name}</h3>
-                    <p className="text-sm opacity-80 mb-6">{(file.size / 1024).toFixed(1)} KB</p>
 
-                    <button
-                        onClick={onClear}
-                        className="px-4 py-2 bg-white/50 hover:bg-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-                    >
-                        <X className="w-4 h-4" />
-                        ファイルを削除
-                    </button>
+                    <div className="text-center w-full">
+                        <h3 className="text-lg font-bold mb-1">
+                            {files.length}個のファイルを選択中
+                        </h3>
+                        <div className="max-h-[100px] overflow-y-auto mb-4 text-sm opacity-80 w-full px-4 scrollbar-thin">
+                            {files.map((f, i) => (
+                                <div key={i} className="truncate" title={f.name}>
+                                    {f.name} ({(f.size / 1024).toFixed(1)} KB)
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

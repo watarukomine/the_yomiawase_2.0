@@ -13,6 +13,7 @@ export interface MappingConfig {
     masterKey: string;
     comparisonKey: string;
     valueColumns: { master: string; comparison: string }[];
+    treatMissingAsZero?: boolean;
 }
 
 export const ColumnMapper: React.FC<ColumnMapperProps> = ({
@@ -24,6 +25,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
     const [masterKey, setMasterKey] = useState<string>('');
     const [comparisonKey, setComparisonKey] = useState<string>('');
     const [valueMappings, setValueMappings] = useState<{ master: string; comparison: string }[]>([]);
+    const [treatMissingAsZero, setTreatMissingAsZero] = useState<boolean>(false);
 
     const handleAddValueMapping = () => {
         setValueMappings([...valueMappings, { master: '', comparison: '' }]);
@@ -146,6 +148,24 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                         )}
                     </div>
                 </div>
+
+                {/* Options Section */}
+                <div className="pt-4 border-t border-slate-100">
+                    <label className="flex items-center gap-3 p-4 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors border border-transparent hover:border-slate-200">
+                        <div className="relative flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={treatMissingAsZero}
+                                onChange={(e) => setTreatMissingAsZero(e.target.checked)}
+                                className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                            />
+                        </div>
+                        <div>
+                            <span className="text-sm font-bold text-slate-700">数値の不一致の場合、空白を0として扱う</span>
+                            <p className="text-xs text-slate-500 mt-0.5">片方が「0」で、もう片方が「空白」の場合に、一致とみなします。</p>
+                        </div>
+                    </label>
+                </div>
             </div>
 
             <div className="p-6 border-t border-slate-200 bg-slate-50 flex justify-end gap-4">
@@ -156,7 +176,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                     戻る
                 </button>
                 <button
-                    onClick={() => onConfirm({ masterKey, comparisonKey, valueColumns: valueMappings })}
+                    onClick={() => onConfirm({ masterKey, comparisonKey, valueColumns: valueMappings, treatMissingAsZero })}
                     disabled={!isValid}
                     className={clsx(
                         "px-8 py-3 text-sm font-bold text-white rounded-xl transition-all flex items-center gap-2 shadow-sm",
