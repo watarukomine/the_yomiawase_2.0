@@ -4,19 +4,21 @@ import { FileUpload } from './components/FileUpload';
 import { DataIngestion } from './components/DataIngestion';
 import { ColumnMapper, type MappingConfig } from './components/ColumnMapper';
 import { HeaderReview } from './components/HeaderReview';
+import { SheetSelector } from './components/SheetSelector';
 import { VerificationDashboard } from './components/VerificationDashboard';
-import { parseExcelFile, type RawSheetData } from './utils/excelParser';
+import { parseExcelFile, type SheetData } from './utils/excelParser';
 import { reconcileData, type ReconciliationResult } from './utils/reconciliation';
 import { clsx } from 'clsx';
 
-type Step = 'UPLOAD' | 'HEADER_MASTER' | 'REVIEW_MASTER' | 'HEADER_COMPARISON' | 'REVIEW_COMPARISON' | 'MAPPING' | 'RESULTS';
+type Step = 'UPLOAD' | 'SHEET_SELECT' | 'HEADER_MASTER' | 'REVIEW_MASTER' | 'HEADER_COMPARISON' | 'REVIEW_COMPARISON' | 'MAPPING' | 'RESULTS';
 
 const STEPS = [
-  { id: 'UPLOAD', label: 'ファイル選択' },
-  { id: 'HEADER_MASTER', label: 'ヘッダー指定(正)' },
-  { id: 'HEADER_COMPARISON', label: 'ヘッダー指定(副)' },
+  { id: 'UPLOAD', label: 'ファイル' },
+  { id: 'SHEET_SELECT', label: 'シート' },
+  { id: 'HEADER_MASTER', label: 'ヘッダー(正)' },
+  { id: 'HEADER_COMPARISON', label: 'ヘッダー(副)' },
   { id: 'MAPPING', label: '列設定' },
-  { id: 'RESULTS', label: '照合結果' },
+  { id: 'RESULTS', label: '結果' },
 ];
 
 function App() {
@@ -27,8 +29,13 @@ function App() {
   const [comparisonFiles, setComparisonFiles] = useState<File[]>([]);
 
   // Data State
-  const [masterRawData, setMasterRawData] = useState<RawSheetData[]>([]);
-  const [comparisonRawData, setComparisonRawData] = useState<RawSheetData[]>([]);
+  // parsed...Data stores ALL sheets from uploaded files
+  const [parsedMasterData, setParsedMasterData] = useState<SheetData[][]>([]);
+  const [parsedComparisonData, setParsedComparisonData] = useState<SheetData[][]>([]);
+
+  // ...RawData stores ONLY the selected sheet's data (array of rows) for each file
+  const [masterRawData, setMasterRawData] = useState<any[][][]>([]);
+  const [comparisonRawData, setComparisonRawData] = useState<any[][][]>([]);
 
   // Header State
   const [masterHeaders, setMasterHeaders] = useState<string[]>([]);
@@ -49,10 +56,10 @@ function App() {
 
       if (type === 'master') {
         setMasterFiles(files);
-        setMasterRawData(allData);
+        setParsedMasterData(allData);
       } else {
         setComparisonFiles(files);
-        setComparisonRawData(allData);
+        setParsedComparisonData(allData);
       }
     } catch (error) {
       console.error("Error parsing file:", error);
@@ -62,13 +69,13 @@ function App() {
 
   const startProcess = () => {
     if (masterFiles.length > 0 && comparisonFiles.length > 0) {
-      setStep('HEADER_MASTER');
+      setStep('SHEET_SELECT');
     }
   };
 
 
   // Helper to find the best matching header row index
-  const findHeaderRow = (dataset: RawSheetData, targetHeaders: string[]): number => {
+  const findHeaderRow = (dataset: any[][], targetHeaders: string[]): number => {
     // Scan first 50 rows
     for (let i = 0; i < Math.min(dataset.length, 50); i++) {
       const row = dataset[i];
@@ -205,11 +212,31 @@ function App() {
     setStep('RESULTS');
   };
 
+  const handleSheetConfirm = (
+    masterSelection: { fileIndex: number, sheetIndex: number }[],
+    comparisonSelection: { fileIndex: number, sheetIndex: number }[]
+  ) => {
+    // Extract the selected sheet data for each file
+    const newMasterRawData = masterSelection.map(sel => {
+      return parsedMasterData[sel.fileIndex][sel.sheetIndex].data;
+    });
+    setMasterRawData(newMasterRawData);
+
+    const newComparisonRawData = comparisonSelection.map(sel => {
+      return parsedComparisonData[sel.fileIndex][sel.sheetIndex].data;
+    });
+    setComparisonRawData(newComparisonRawData);
+
+    setStep('HEADER_MASTER');
+  };
+
   const handleReset = () => {
     if (confirm('最初からやり直しますか？現在の作業内容は失われます。')) {
       setStep('UPLOAD');
       setMasterFiles([]);
       setComparisonFiles([]);
+      setParsedMasterData([]);
+      setParsedComparisonData([]);
       setMasterRawData([]);
       setComparisonRawData([]);
       setMasterHeaders([]);
@@ -295,7 +322,10 @@ function App() {
                 subLabel="人事システム等の信頼できるデータ"
                 files={masterFiles}
                 onFilesSelect={(f) => handleFileUpload(f, 'master')}
-                onClear={() => setMasterFiles([])}
+                onClear={() => {
+                  setMasterFiles([]);
+                  setParsedMasterData([]);
+                }}
                 color="blue"
               />
               <FileUpload
@@ -303,7 +333,10 @@ function App() {
                 subLabel="銀行振込ファイル等のチェック対象"
                 files={comparisonFiles}
                 onFilesSelect={(f) => handleFileUpload(f, 'comparison')}
-                onClear={() => setComparisonFiles([])}
+                onClear={() => {
+                  setComparisonFiles([]);
+                  setParsedComparisonData([]);
+                }}
                 color="emerald"
               />
             </div>
@@ -325,12 +358,23 @@ function App() {
           </div>
         )}
 
+        {step === 'SHEET_SELECT' && (
+          <SheetSelector
+            masterFiles={masterFiles}
+            masterParsedData={parsedMasterData}
+            comparisonFiles={comparisonFiles}
+            comparisonParsedData={parsedComparisonData}
+            onConfirm={handleSheetConfirm}
+            onBack={() => setStep('UPLOAD')}
+          />
+        )}
+
         {step === 'HEADER_MASTER' && (
           <DataIngestion
             title={`マスターデータ (正) - ${masterFiles.length}ファイル`}
             data={masterRawData[0] || []}
             onConfirm={(idx, headers) => handleHeaderConfirm('master', idx, headers)}
-            onCancel={() => setStep('UPLOAD')}
+            onCancel={() => setStep('SHEET_SELECT')}
           />
         )}
 
