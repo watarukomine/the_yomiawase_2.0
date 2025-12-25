@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { clsx } from 'clsx';
-import type { RawSheetData } from '../utils/excelParser';
-
 interface DataIngestionProps {
     title: string;
-    data: RawSheetData;
+    data: any[][];
     onConfirm: (headerRowIndex: number, headers: string[]) => void;
     onCancel: () => void;
 }
@@ -18,7 +16,7 @@ export const DataIngestion: React.FC<DataIngestionProps> = ({ title, data, onCon
 
     const handleConfirm = () => {
         if (selectedRowIndex !== null) {
-            const headers = data[selectedRowIndex].map(cell => String(cell || ''));
+            const headers = data[selectedRowIndex].map((cell: any) => String(cell || ''));
             onConfirm(selectedRowIndex, headers);
         }
     };
@@ -57,7 +55,7 @@ export const DataIngestion: React.FC<DataIngestionProps> = ({ title, data, onCon
                 <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
                     <table className="w-full text-sm text-left">
                         <tbody>
-                            {previewData.map((row, rowIndex) => (
+                            {previewData.map((row: any[], rowIndex: number) => (
                                 <tr
                                     key={rowIndex}
                                     onClick={() => setSelectedRowIndex(rowIndex)}
@@ -71,7 +69,7 @@ export const DataIngestion: React.FC<DataIngestionProps> = ({ title, data, onCon
                                     <td className="p-4 w-16 text-xs text-slate-400 font-mono select-none bg-slate-50 border-r border-slate-200 text-center">
                                         {rowIndex + 1}
                                     </td>
-                                    {row.map((cell, cellIndex) => (
+                                    {row.map((cell: any, cellIndex: number) => (
                                         <td key={cellIndex} className="p-4 text-slate-700 whitespace-nowrap max-w-[200px] truncate border-r border-slate-100 last:border-0">
                                             {String(cell ?? '')}
                                         </td>
