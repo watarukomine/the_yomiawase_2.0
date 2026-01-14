@@ -73,8 +73,8 @@ export const SheetSelector: React.FC<SheetSelectorProps> = ({
         const iconColor = type === 'master' ? 'text-blue-600' : 'text-emerald-600';
 
         return (
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
+            <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-1">
                     <Layers className={clsx("w-5 h-5", iconColor)} />
                     <h3 className="font-bold text-slate-700">{title}</h3>
                 </div>
@@ -144,11 +144,10 @@ export const SheetSelector: React.FC<SheetSelectorProps> = ({
     return (
         <div className="max-w-5xl mx-auto w-full h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex-1 overflow-y-auto min-h-0 space-y-8 pb-4">
-                <div className="text-center space-y-3">
-                    <h2 className="text-3xl font-bold text-slate-900">使用するシートを選択</h2>
-                    <p className="text-slate-500 text-lg">
-                        アップロードされたファイルに含まれるシート一覧です。<br />
-                        照合に使用するシートをそれぞれ選択してください。
+                <div className="text-center space-y-2 mb-4">
+                    <h2 className="text-2xl font-bold text-slate-900">使用するシートを選択</h2>
+                    <p className="text-slate-500 text-sm">
+                        アップロードされたファイルに含まれるシート一覧です。照合に使用するシートをそれぞれ選択してください。
                     </p>
                 </div>
 

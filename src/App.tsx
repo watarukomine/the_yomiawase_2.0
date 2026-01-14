@@ -265,7 +265,7 @@ function App() {
   const currentStepIndex = STEPS.findIndex(s => s.id === step);
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-50 flex flex-col font-sans text-slate-900">
+    <div className="h-[100dvh] overflow-hidden bg-slate-50 flex flex-col font-sans text-slate-900">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 flex-shrink-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -322,7 +322,7 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 overflow-hidden flex flex-col min-h-0">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-2 overflow-hidden flex flex-col min-h-0">
         {step === 'UPLOAD' && (
           <div className="max-w-3xl mx-auto w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-3 mb-8">

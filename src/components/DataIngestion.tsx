@@ -23,7 +23,7 @@ export const DataIngestion: React.FC<DataIngestionProps> = ({ title, data, onCon
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full animate-in fade-in zoom-in-95 duration-300">
-            <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div>
                     <h3 className="text-lg font-bold text-slate-900">{title} のヘッダー行を選択</h3>
                     <p className="text-sm text-slate-500 mt-1">表の「項目名」が書かれている行をクリックして選択してください。</p>
@@ -51,7 +51,7 @@ export const DataIngestion: React.FC<DataIngestionProps> = ({ title, data, onCon
                 </div>
             </div>
 
-            <div className="overflow-auto flex-1 p-6 bg-slate-50/50">
+            <div className="overflow-auto flex-1 p-2 sm:p-4 bg-slate-50/50 min-h-0">
                 <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
                     <table className="w-full text-sm text-left">
                         <tbody>
