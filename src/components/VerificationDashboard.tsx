@@ -79,8 +79,8 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
 
     return (
         <div className="space-y-6 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">
-            {/* Sticky Header Wrapper (Summary Cards + Toolbar) */}
-            <div className="sticky top-16 z-20 bg-slate-50 pb-2 -mt-2 pt-2 mb-2 shadow-sm border-b border-slate-100/50">
+            {/* Sticky Header Wrapper (Summary Cards + Toolbar + Header Row) */}
+            <div className="sticky top-16 z-20 bg-slate-50 pb-0 -mt-2 pt-2 mb-0 shadow-sm border-b border-slate-200">
                 {/* Summary Cards Section */}
                 <div className="bg-slate-50 space-y-4 pt-1 pb-2 px-1">
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -120,7 +120,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                 </div>
 
                 {/* Toolbar Section */}
-                <div className="bg-slate-50 pb-1">
+                <div className="bg-slate-50 pb-2">
                     <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
                         <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
                             {[
@@ -187,104 +187,104 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                         </div>
                     </div>
                 </div>
+
+                {/* Header Row (Part of Sticky) */}
+                <div className="bg-white border-t border-slate-200 rounded-t-xl overflow-hidden">
+                    <div className="grid grid-cols-[5rem_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)] text-sm font-medium text-slate-500 bg-slate-50">
+                        <div className="p-4 text-center">確認</div>
+                        <div className="p-4">キー項目</div>
+                        <div className="p-4">ステータス</div>
+                        <div className="p-4">詳細 (マスター vs 照合データ)</div>
+                    </div>
+                </div>
             </div>
 
-            {/* Results List */}
-            <div className="flex-1 overflow-auto bg-white rounded-xl border border-slate-200 shadow-sm min-h-0">
-                <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50 text-slate-500 font-medium z-10 shadow-sm border-b border-slate-200">
-                        <tr>
-                            <th className="p-4 w-20 text-center">確認</th>
-                            <th className="p-4">キー項目</th>
-                            <th className="p-4">ステータス</th>
-                            <th className="p-4">詳細 (マスター vs 照合データ)</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {filteredResults.map((result) => (
-                            <tr
-                                key={result.key}
-                                className={clsx(
-                                    "hover:bg-slate-50 transition-colors",
-                                    result.isVerified ? "bg-emerald-50/30" : ""
-                                )}
-                            >
-                                <td className="p-4 text-center">
-                                    <button
-                                        onClick={() => toggleVerify(result.key)}
-                                        className={clsx(
-                                            "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200",
-                                            result.isVerified
-                                                ? "bg-emerald-500 text-white shadow-sm scale-105"
-                                                : "bg-slate-100 text-slate-300 hover:bg-slate-200 hover:text-slate-400"
-                                        )}
-                                        title={result.isVerified ? "確認済みを解除" : "確認済みにする"}
-                                    >
-                                        <Check className="w-6 h-6" />
-                                    </button>
-                                </td>
-                                <td className="p-4 font-bold text-slate-700 text-base">{result.key}</td>
-                                <td className="p-4">
-                                    <span className={clsx(
-                                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm",
-                                        result.status === 'MATCH' && "bg-emerald-100 text-emerald-700",
-                                        result.status === 'MISMATCH' && "bg-red-100 text-red-700",
-                                        result.status.startsWith('MISSING') && "bg-amber-100 text-amber-700",
-                                        result.status.startsWith('DUPLICATE') && "bg-purple-100 text-purple-700",
-                                    )}>
-                                        {result.status === 'MATCH' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                                        {result.status === 'MISMATCH' && <XCircle className="w-3.5 h-3.5" />}
-                                        {result.status.startsWith('MISSING') && <AlertTriangle className="w-3.5 h-3.5" />}
-                                        {result.status.startsWith('DUPLICATE') && <KeyRound className="w-3.5 h-3.5" />}
-                                        {result.status === 'MATCH' && '一致'}
-                                        {result.status === 'MISMATCH' && '不一致'}
-                                        {result.status === 'MISSING_IN_COMPARISON' && '照合データに無し'}
-                                        {result.status === 'MISSING_IN_MASTER' && 'マスターに無し'}
-                                        {result.status === 'DUPLICATE_IN_MASTER' && 'マスターでキー重複'}
-                                        {result.status === 'DUPLICATE_IN_COMPARISON' && '照合データでキー重複'}
-                                    </span>
-                                </td>
-                                <td className="p-4">
-                                    {result.status === 'MISMATCH' && (
-                                        <div className="space-y-2 bg-red-50/50 p-3 rounded-lg border border-red-100">
-                                            {result.diffs.filter(d => !d.isMatch).map((diff, idx) => (
-                                                <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
-                                                    <span className="text-slate-500 font-medium min-w-[100px]" title={diff.columnName}>{diff.columnName}:</span>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="bg-white text-red-700 px-2 py-1 rounded border border-red-200 line-through decoration-red-300 opacity-70">
-                                                            {String(diff.masterValue ?? '(空)')}
-                                                        </span>
-                                                        <span className="text-slate-400">→</span>
-                                                        <span className="bg-white text-emerald-700 px-2 py-1 rounded border border-emerald-200 font-bold shadow-sm">
-                                                            {String(diff.comparisonValue ?? '(空)')}
-                                                        </span>
-                                                    </div>
+            {/* Scrollable Results List */}
+            <div className="flex-1 overflow-auto bg-white rounded-b-xl border border-slate-200 border-t-0 shadow-sm min-h-0 pt-0">
+                <div className="divide-y divide-slate-100">
+                    {filteredResults.map((result) => (
+                        <div
+                            key={result.key}
+                            className={clsx(
+                                "grid grid-cols-[5rem_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)] text-sm hover:bg-slate-50 transition-colors items-center",
+                                result.isVerified ? "bg-emerald-50/30" : ""
+                            )}
+                        >
+                            <div className="p-4 text-center flex justify-center items-center">
+                                <button
+                                    onClick={() => toggleVerify(result.key)}
+                                    className={clsx(
+                                        "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200",
+                                        result.isVerified
+                                            ? "bg-emerald-500 text-white shadow-sm scale-105"
+                                            : "bg-slate-100 text-slate-300 hover:bg-slate-200 hover:text-slate-400"
+                                    )}
+                                    title={result.isVerified ? "確認済みを解除" : "確認済みにする"}
+                                >
+                                    <Check className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <div className="p-4 font-bold text-slate-700 text-base break-words">
+                                {result.key}
+                            </div>
+                            <div className="p-4">
+                                <span className={clsx(
+                                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm",
+                                    result.status === 'MATCH' && "bg-emerald-100 text-emerald-700",
+                                    result.status === 'MISMATCH' && "bg-red-100 text-red-700",
+                                    result.status.startsWith('MISSING') && "bg-amber-100 text-amber-700",
+                                    result.status.startsWith('DUPLICATE') && "bg-purple-100 text-purple-700",
+                                )}>
+                                    {result.status === 'MATCH' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                    {result.status === 'MISMATCH' && <XCircle className="w-3.5 h-3.5" />}
+                                    {result.status.startsWith('MISSING') && <AlertTriangle className="w-3.5 h-3.5" />}
+                                    {result.status.startsWith('DUPLICATE') && <KeyRound className="w-3.5 h-3.5" />}
+                                    {result.status === 'MATCH' && '一致'}
+                                    {result.status === 'MISMATCH' && '不一致'}
+                                    {result.status === 'MISSING_IN_COMPARISON' && '照合データに無し'}
+                                    {result.status === 'MISSING_IN_MASTER' && 'マスターに無し'}
+                                    {result.status === 'DUPLICATE_IN_MASTER' && 'マスターでキー重複'}
+                                    {result.status === 'DUPLICATE_IN_COMPARISON' && '照合データでキー重複'}
+                                </span>
+                            </div>
+                            <div className="p-4">
+                                {result.status === 'MISMATCH' && (
+                                    <div className="space-y-2 bg-red-50/50 p-3 rounded-lg border border-red-100">
+                                        {result.diffs.filter(d => !d.isMatch).map((diff, idx) => (
+                                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
+                                                <span className="text-slate-500 font-medium min-w-[100px]" title={diff.columnName}>{diff.columnName}:</span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="bg-white text-red-700 px-2 py-1 rounded border border-red-200 line-through decoration-red-300 opacity-70">
+                                                        {String(diff.masterValue ?? '(空)')}
+                                                    </span>
+                                                    <span className="text-slate-400">→</span>
+                                                    <span className="bg-white text-emerald-700 px-2 py-1 rounded border border-emerald-200 font-bold shadow-sm">
+                                                        {String(diff.comparisonValue ?? '(空)')}
+                                                    </span>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {result.status.startsWith('DUPLICATE') && (
-                                        <div className="bg-purple-50 p-3 rounded-lg border border-purple-100 text-xs text-purple-800">
-                                            <p className="font-bold mb-1">重複行 ({result.duplicateRows?.length || 0}件):</p>
-                                            <p>データ処理設定で「重複として出力」が選ばれました。 元データを修正するか、合算設定を利用してください。</p>
-                                        </div>
-                                    )}
-                                    {result.status === 'MATCH' && <span className="text-slate-400 text-sm">すべての項目が一致しています</span>}
-                                    {result.status === 'MISSING_IN_COMPARISON' && <span className="text-slate-400 text-sm">照合データに行が存在しません</span>}
-                                    {result.status === 'MISSING_IN_MASTER' && <span className="text-slate-400 text-sm">マスターデータに行が存在しません</span>}
-                                </td>
-                            </tr>
-                        ))}
-                        {filteredResults.length === 0 && (
-                            <tr>
-                                <td colSpan={4} className="p-12 text-center text-slate-400">
-                                    <p className="text-lg font-medium">該当するデータがありません</p>
-                                    <p className="text-sm mt-1">検索条件やフィルターを変更してみてください</p>
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {result.status.startsWith('DUPLICATE') && (
+                                    <div className="bg-purple-50 p-3 rounded-lg border border-purple-100 text-xs text-purple-800">
+                                        <p className="font-bold mb-1">重複行 ({result.duplicateRows?.length || 0}件):</p>
+                                        <p>データ処理設定で「重複として出力」が選ばれました。 元データを修正するか、合算設定を利用してください。</p>
+                                    </div>
+                                )}
+                                {result.status === 'MATCH' && <span className="text-slate-400 text-sm">すべての項目が一致しています</span>}
+                                {result.status === 'MISSING_IN_COMPARISON' && <span className="text-slate-400 text-sm">照合データに行が存在しません</span>}
+                                {result.status === 'MISSING_IN_MASTER' && <span className="text-slate-400 text-sm">マスターデータに行が存在しません</span>}
+                            </div>
+                        </div>
+                    ))}
+                    {filteredResults.length === 0 && (
+                        <div className="p-12 text-center text-slate-400">
+                            <p className="text-lg font-medium">該当するデータがありません</p>
+                            <p className="text-sm mt-1">検索条件やフィルターを変更してみてください</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
