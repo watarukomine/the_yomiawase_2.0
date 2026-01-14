@@ -251,7 +251,7 @@ function App() {
   const currentStepIndex = STEPS.findIndex(s => s.id === step);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
+    <div className="h-screen overflow-hidden bg-slate-50 flex flex-col font-sans text-slate-900">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 flex-shrink-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
