@@ -79,9 +79,77 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
 
     return (
         <div className="space-y-6 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">
-            {/* Header Section (Not Sticky for Cards) */}
+            {/* Sticky Toolbar Section - Moved to Top */}
+            <div className="sticky top-16 z-20 bg-slate-50 pb-2 -mt-2 pt-2">
+                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                        {[
+                            { id: 'ALL', label: 'すべて' },
+                            { id: 'MISMATCH', label: '不一致のみ' },
+                            { id: 'MISSING', label: '欠落のみ' },
+                            { id: 'DUPLICATE', label: '重複のみ' },
+                            { id: 'VERIFIED', label: '確認済み' }
+                        ].map(f => (
+                            <button
+                                key={f.id}
+                                onClick={() => setFilter(f.id as any)}
+                                className={clsx(
+                                    "px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap",
+                                    filter === f.id
+                                        ? "bg-slate-800 text-white shadow-md"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                )}
+                            >
+                                {f.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex gap-3 w-full md:w-auto">
+                        <div className="relative flex-1 md:w-64">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="キー項目で検索..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-9 pr-4 py-2 rounded-lg border-slate-200 text-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors"
+                            />
+                        </div>
+                        <button
+                            onClick={onBack}
+                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                        >
+                            <RotateCcw className="w-4 h-4 rotate-180" />
+                            列設定に戻る
+                        </button>
+                        <button
+                            onClick={onSheetReset}
+                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                        >
+                            <FileSpreadsheet className="w-4 h-4" />
+                            シート選択からやり直す
+                        </button>
+                        <button
+                            onClick={onReset}
+                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                            最初から
+                        </button>
+                        <button
+                            onClick={handleExport}
+                            className="px-4 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                        >
+                            <Download className="w-4 h-4" />
+                            結果を出力
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Summary Cards Section - Moved Below Toolbar */}
             <div className="bg-slate-50 space-y-4 pt-1 pb-2">
-                {/* Summary Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <p className="text-sm text-slate-500 font-medium">全データ件数</p>
@@ -118,83 +186,9 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                 </div>
             </div>
 
-            {/* Sticky Toolbar */}
-            <div className="sticky top-16 z-20 bg-slate-50 pb-2 -mt-2">
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
-                    <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-                        {[
-                            { id: 'ALL', label: 'すべて' },
-                            { id: 'MISMATCH', label: '不一致のみ' },
-                            { id: 'MISSING', label: '欠落のみ' },
-                            { id: 'DUPLICATE', label: '重複のみ' },
-                            { id: 'VERIFIED', label: '確認済み' }
-                        ].map(f => (
-                            <button
-                                key={f.id}
-                                onClick={() => setFilter(f.id as any)}
-                                className={clsx(
-                                    "px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap",
-                                    filter === f.id
-                                        ? "bg-slate-800 text-white shadow-md"
-                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                )}
-                            >
-                                {f.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Right side controls remain same */}
-                    <div className="flex gap-3 w-full md:w-auto">
-                        <div className="relative flex-1 md:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="キー項目で検索..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 rounded-lg border-slate-200 text-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors"
-                            />
-                        </div>
-                        <button
-                            onClick={onBack}
-                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
-                        >
-                            <RotateCcw className="w-4 h-4 rotate-180" /> {/* Flip icon for back */}
-                            列設定に戻る
-                        </button>
-                        <button
-                            onClick={onSheetReset}
-                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
-                        >
-                            <FileSpreadsheet className="w-4 h-4" />
-                            シート選択からやり直す
-                        </button>
-                        <button
-                            onClick={onReset}
-                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
-                        >
-                            <RotateCcw className="w-4 h-4" />
-                            最初から
-                        </button>
-                        <button
-                            onClick={handleExport}
-                            className="px-4 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
-                        >
-                            <Download className="w-4 h-4" />
-                            結果を出力
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             {/* Results List */}
             <div className="flex-1 overflow-auto bg-white rounded-xl border border-slate-200 shadow-sm min-h-0">
                 <table className="w-full text-sm text-left">
-                    {/* Header sticking below toolbar (64px header + ~88px toolbar = top-36/144px approx) 
-                        Toolbar is sticky top-16. Toolbar height approx 80px-90px. 
-                        Let's try top-36 (144px) - header(64) = 80px relative. 
-                     */}
                     <thead className="bg-slate-50 text-slate-500 font-medium sticky top-[138px] z-10 shadow-sm">
                         <tr>
                             <th className="p-4 w-20 text-center">確認</th>
@@ -269,7 +263,6 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                                     {result.status.startsWith('DUPLICATE') && (
                                         <div className="bg-purple-50 p-3 rounded-lg border border-purple-100 text-xs text-purple-800">
                                             <p className="font-bold mb-1">重複行 ({result.duplicateRows?.length || 0}件):</p>
-                                            {/* We can list details of duplicate rows here if needed */}
                                             <p>データ処理設定で「重複として出力」が選ばれました。 元データを修正するか、合算設定を利用してください。</p>
                                         </div>
                                     )}
