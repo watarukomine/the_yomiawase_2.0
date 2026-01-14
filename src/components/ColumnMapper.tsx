@@ -31,7 +31,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
     const [comparisonKey, setComparisonKey] = useState<string>(initialConfig?.comparisonKey || '');
     const [valueMappings, setValueMappings] = useState<{ master: string; comparison: string }[]>(initialConfig?.valueColumns || []);
     const [treatMissingAsZero, setTreatMissingAsZero] = useState<boolean>(initialConfig?.treatMissingAsZero || false);
-    const [duplicateHandling, setDuplicateHandling] = useState<DuplicateHandlingStrategy>(initialConfig?.duplicateHandling || 'OVERWRITE');
+    const [duplicateHandling, setDuplicateHandling] = useState<DuplicateHandlingStrategy>(initialConfig?.duplicateHandling || 'FLAG');
 
     const handleAddValueMapping = () => {
         setValueMappings([...valueMappings, { master: '', comparison: '' }]);
