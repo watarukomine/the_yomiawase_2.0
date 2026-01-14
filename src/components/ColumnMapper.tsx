@@ -9,11 +9,14 @@ interface ColumnMapperProps {
     onBack: () => void;
 }
 
+export type DuplicateHandlingStrategy = 'OVERWRITE' | 'SUM' | 'FLAG';
+
 export interface MappingConfig {
     masterKey: string;
     comparisonKey: string;
     valueColumns: { master: string; comparison: string }[];
     treatMissingAsZero?: boolean;
+    duplicateHandling: DuplicateHandlingStrategy;
 }
 
 export const ColumnMapper: React.FC<ColumnMapperProps> = ({
@@ -26,6 +29,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
     const [comparisonKey, setComparisonKey] = useState<string>('');
     const [valueMappings, setValueMappings] = useState<{ master: string; comparison: string }[]>([]);
     const [treatMissingAsZero, setTreatMissingAsZero] = useState<boolean>(false);
+    const [duplicateHandling, setDuplicateHandling] = useState<DuplicateHandlingStrategy>('OVERWRITE');
 
     const handleAddValueMapping = () => {
         setValueMappings([...valueMappings, { master: '', comparison: '' }]);
@@ -149,6 +153,89 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                     </div>
                 </div>
 
+                {/* Duplicate Handling Section */}
+                <div className="pt-6 border-t border-slate-100">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-amber-600 font-bold text-lg">
+                            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                                <TableProperties className="w-5 h-5" />
+                            </div>
+                            <h4>3. 重複キーの処理方法</h4>
+                        </div>
+                        <p className="text-sm text-slate-500 ml-10">
+                            同じキー（社員番号など）が複数回登場した場合の処理方法を選択してください。
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ml-2">
+                            <label className={clsx(
+                                "flex flex-col p-4 rounded-xl border cursor-pointer transition-all",
+                                duplicateHandling === 'OVERWRITE'
+                                    ? "bg-indigo-50 border-indigo-200 ring-2 ring-indigo-500"
+                                    : "bg-white border-slate-200 hover:bg-slate-50"
+                            )}>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="radio"
+                                        name="duplicateHandling"
+                                        value="OVERWRITE"
+                                        checked={duplicateHandling === 'OVERWRITE'}
+                                        onChange={(e) => setDuplicateHandling(e.target.value as any)}
+                                        className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
+                                    />
+                                    <span className="font-bold text-slate-700">上書き (デフォルト)</span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-2 pl-7">
+                                    後から出てきた行で上書きします。最後の1行のみが有効になります。
+                                </p>
+                            </label>
+
+                            <label className={clsx(
+                                "flex flex-col p-4 rounded-xl border cursor-pointer transition-all",
+                                duplicateHandling === 'SUM'
+                                    ? "bg-indigo-50 border-indigo-200 ring-2 ring-indigo-500"
+                                    : "bg-white border-slate-200 hover:bg-slate-50"
+                            )}>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="radio"
+                                        name="duplicateHandling"
+                                        value="SUM"
+                                        checked={duplicateHandling === 'SUM'}
+                                        onChange={(e) => setDuplicateHandling(e.target.value as any)}
+                                        className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
+                                    />
+                                    <span className="font-bold text-slate-700">合算する</span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-2 pl-7">
+                                    キーごとに数値項目を合計し、1行にまとめて照合します。
+                                </p>
+                            </label>
+
+                            <label className={clsx(
+                                "flex flex-col p-4 rounded-xl border cursor-pointer transition-all",
+                                duplicateHandling === 'FLAG'
+                                    ? "bg-indigo-50 border-indigo-200 ring-2 ring-indigo-500"
+                                    : "bg-white border-slate-200 hover:bg-slate-50"
+                            )}>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="radio"
+                                        name="duplicateHandling"
+                                        value="FLAG"
+                                        checked={duplicateHandling === 'FLAG'}
+                                        onChange={(e) => setDuplicateHandling(e.target.value as any)}
+                                        className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
+                                    />
+                                    <span className="font-bold text-slate-700">重複として出力</span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-2 pl-7">
+                                    合算せず、すべての行を「重複エラー」として結果に出力します。
+                                </p>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Options Section */}
                 <div className="pt-4 border-t border-slate-100">
                     <label className="flex items-center gap-3 p-4 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors border border-transparent hover:border-slate-200">
@@ -176,7 +263,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                     戻る
                 </button>
                 <button
-                    onClick={() => onConfirm({ masterKey, comparisonKey, valueColumns: valueMappings, treatMissingAsZero })}
+                    onClick={() => onConfirm({ masterKey, comparisonKey, valueColumns: valueMappings, treatMissingAsZero, duplicateHandling })}
                     disabled={!isValid}
                     className={clsx(
                         "px-8 py-3 text-sm font-bold text-white rounded-xl transition-all flex items-center gap-2 shadow-sm",

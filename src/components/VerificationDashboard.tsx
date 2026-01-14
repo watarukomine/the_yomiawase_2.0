@@ -19,7 +19,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
     onSheetReset,
     onBack
 }) => {
-    const [filter, setFilter] = useState<'ALL' | 'MISMATCH' | 'MISSING' | 'VERIFIED'>('ALL');
+    const [filter, setFilter] = useState<'ALL' | 'MISMATCH' | 'MISSING' | 'DUPLICATE' | 'VERIFIED'>('ALL');
     const [searchTerm, setSearchTerm] = useState('');
 
     const stats = useMemo(() => {
@@ -28,6 +28,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
             matched: results.filter(r => r.status === 'MATCH').length,
             mismatched: results.filter(r => r.status === 'MISMATCH').length,
             missing: results.filter(r => r.status.startsWith('MISSING')).length,
+            duplicate: results.filter(r => r.status.startsWith('DUPLICATE')).length,
             verified: results.filter(r => r.isVerified).length,
         };
     }, [results]);
@@ -41,6 +42,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
             if (filter === 'VERIFIED') return r.isVerified;
             if (filter === 'MISMATCH') return r.status === 'MISMATCH';
             if (filter === 'MISSING') return r.status.startsWith('MISSING');
+            if (filter === 'DUPLICATE') return r.status.startsWith('DUPLICATE');
             return true;
         });
     }, [results, filter, searchTerm]);
@@ -76,11 +78,11 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
     };
 
     return (
-        <div className="space-y-6 h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-6 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">
             {/* Sticky Header Section */}
             <div className="sticky top-0 z-20 bg-slate-50 space-y-4 pt-1 pb-2">
                 {/* Summary Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <p className="text-sm text-slate-500 font-medium">全データ件数</p>
                         <p className="text-3xl font-bold text-slate-900 mt-1">{stats.total}</p>
@@ -99,6 +101,13 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                         <p className="text-sm text-amber-600 font-bold">欠落データ</p>
                         <p className="text-3xl font-bold text-amber-700 mt-1">{stats.missing}</p>
                     </div>
+                    <div className="bg-white p-5 rounded-xl border border-purple-100 shadow-sm relative overflow-hidden">
+                        <div className="absolute right-0 top-0 p-3 opacity-10">
+                            <KeyRound className="w-16 h-16 text-purple-500" />
+                        </div>
+                        <p className="text-sm text-purple-600 font-bold">重複キー</p>
+                        <p className="text-3xl font-bold text-purple-700 mt-1">{stats.duplicate}</p>
+                    </div>
                     <div className="bg-white p-5 rounded-xl border border-emerald-100 shadow-sm relative overflow-hidden">
                         <div className="absolute right-0 top-0 p-3 opacity-10">
                             <CheckCircle2 className="w-16 h-16 text-emerald-500" />
@@ -115,6 +124,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                             { id: 'ALL', label: 'すべて' },
                             { id: 'MISMATCH', label: '不一致のみ' },
                             { id: 'MISSING', label: '欠落のみ' },
+                            { id: 'DUPLICATE', label: '重複のみ' },
                             { id: 'VERIFIED', label: '確認済み' }
                         ].map(f => (
                             <button
@@ -132,6 +142,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                         ))}
                     </div>
 
+                    {/* Right side controls remain same */}
                     <div className="flex gap-3 w-full md:w-auto">
                         <div className="relative flex-1 md:w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -176,7 +187,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
             </div>
 
             {/* Results List */}
-            <div className="flex-1 overflow-auto bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex-1 overflow-auto bg-white rounded-xl border border-slate-200 shadow-sm min-h-0">
                 <table className="w-full text-sm text-left">
                     <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10 shadow-sm">
                         <tr>
@@ -216,14 +227,18 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                                         result.status === 'MATCH' && "bg-emerald-100 text-emerald-700",
                                         result.status === 'MISMATCH' && "bg-red-100 text-red-700",
                                         result.status.startsWith('MISSING') && "bg-amber-100 text-amber-700",
+                                        result.status.startsWith('DUPLICATE') && "bg-purple-100 text-purple-700",
                                     )}>
                                         {result.status === 'MATCH' && <CheckCircle2 className="w-3.5 h-3.5" />}
                                         {result.status === 'MISMATCH' && <XCircle className="w-3.5 h-3.5" />}
                                         {result.status.startsWith('MISSING') && <AlertTriangle className="w-3.5 h-3.5" />}
+                                        {result.status.startsWith('DUPLICATE') && <KeyRound className="w-3.5 h-3.5" />}
                                         {result.status === 'MATCH' && '一致'}
                                         {result.status === 'MISMATCH' && '不一致'}
                                         {result.status === 'MISSING_IN_COMPARISON' && '照合データに無し'}
                                         {result.status === 'MISSING_IN_MASTER' && 'マスターに無し'}
+                                        {result.status === 'DUPLICATE_IN_MASTER' && 'マスターでキー重複'}
+                                        {result.status === 'DUPLICATE_IN_COMPARISON' && '照合データでキー重複'}
                                     </span>
                                 </td>
                                 <td className="p-4">
@@ -243,6 +258,13 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                                                     </div>
                                                 </div>
                                             ))}
+                                        </div>
+                                    )}
+                                    {result.status.startsWith('DUPLICATE') && (
+                                        <div className="bg-purple-50 p-3 rounded-lg border border-purple-100 text-xs text-purple-800">
+                                            <p className="font-bold mb-1">重複行 ({result.duplicateRows?.length || 0}件):</p>
+                                            {/* We can list details of duplicate rows here if needed */}
+                                            <p>データ処理設定で「重複として出力」が選ばれました。 元データを修正するか、合算設定を利用してください。</p>
                                         </div>
                                     )}
                                     {result.status === 'MATCH' && <span className="text-slate-400 text-sm">すべての項目が一致しています</span>}
