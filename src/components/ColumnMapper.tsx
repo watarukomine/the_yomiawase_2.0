@@ -171,7 +171,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ml-2">
                             <label className={clsx(
                                 "flex flex-col p-4 rounded-xl border cursor-pointer transition-all",
-                                duplicateHandling === 'OVERWRITE'
+                                duplicateHandling === 'FLAG'
                                     ? "bg-indigo-50 border-indigo-200 ring-2 ring-indigo-500"
                                     : "bg-white border-slate-200 hover:bg-slate-50"
                             )}>
@@ -179,15 +179,16 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                                     <input
                                         type="radio"
                                         name="duplicateHandling"
-                                        value="OVERWRITE"
-                                        checked={duplicateHandling === 'OVERWRITE'}
+                                        value="FLAG"
+                                        checked={duplicateHandling === 'FLAG'}
                                         onChange={(e) => setDuplicateHandling(e.target.value as any)}
                                         className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
                                     />
-                                    <span className="font-bold text-slate-700">上書き (デフォルト)</span>
+                                    {/* Default is now FLAG, so maybe remove "(デフォルト)" text from Overwrite if present, or add it here? The user just said "Default to Duplicate Output". I will add "(推奨)" (Recommended) or similar if appropriate, but simply reordering is the main request. Let's just reorder for now and keep the "Default" text removed from Overwrite to avoid confusion since FLAG is now the state default. */}
+                                    <span className="font-bold text-slate-700">重複として出力 (推奨)</span>
                                 </div>
                                 <p className="text-xs text-slate-500 mt-2 pl-7">
-                                    後から出てきた行で上書きします。最後の1行のみが有効になります。
+                                    合算せず、すべての行を「重複エラー」として結果に出力します。
                                 </p>
                             </label>
 
@@ -215,7 +216,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
 
                             <label className={clsx(
                                 "flex flex-col p-4 rounded-xl border cursor-pointer transition-all",
-                                duplicateHandling === 'FLAG'
+                                duplicateHandling === 'OVERWRITE'
                                     ? "bg-indigo-50 border-indigo-200 ring-2 ring-indigo-500"
                                     : "bg-white border-slate-200 hover:bg-slate-50"
                             )}>
@@ -223,15 +224,15 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                                     <input
                                         type="radio"
                                         name="duplicateHandling"
-                                        value="FLAG"
-                                        checked={duplicateHandling === 'FLAG'}
+                                        value="OVERWRITE"
+                                        checked={duplicateHandling === 'OVERWRITE'}
                                         onChange={(e) => setDuplicateHandling(e.target.value as any)}
                                         className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
                                     />
-                                    <span className="font-bold text-slate-700">重複として出力</span>
+                                    <span className="font-bold text-slate-700">上書き</span>
                                 </div>
                                 <p className="text-xs text-slate-500 mt-2 pl-7">
-                                    合算せず、すべての行を「重複エラー」として結果に出力します。
+                                    後から出てきた行で上書きします。最後の1行のみが有効になります。
                                 </p>
                             </label>
                         </div>
