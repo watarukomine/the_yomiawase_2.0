@@ -230,8 +230,22 @@ function App() {
     setStep('HEADER_MASTER');
   };
 
+  const handleSheetReset = () => {
+    if (confirm('シート選択からやり直しますか？現在の照合結果は失われますが、ファイルは保持されます。')) {
+      setStep('SHEET_SELECT');
+      setMasterRawData([]);
+      setComparisonRawData([]);
+      setMasterHeaders([]);
+      setComparisonHeaders([]);
+      setMasterRowIndices([]);
+      setComparisonRowIndices([]);
+      setActivePreviewFileIndex(null);
+      setResults([]);
+    }
+  };
+
   const handleReset = () => {
-    if (confirm('最初からやり直しますか？現在の作業内容は失われます。')) {
+    if (confirm('最初からやり直しますか？現在の作業内容はすべて失われます。')) {
       setStep('UPLOAD');
       setMasterFiles([]);
       setComparisonFiles([]);
@@ -444,6 +458,7 @@ function App() {
             results={results}
             onUpdateResults={setResults}
             onReset={handleReset}
+            onSheetReset={handleSheetReset}
             onBack={() => setStep('MAPPING')}
           />
         )}

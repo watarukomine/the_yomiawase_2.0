@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { CheckCircle2, XCircle, AlertTriangle, Search, Check, Download, RotateCcw } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Search, Check, Download, RotateCcw, FileSpreadsheet } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { ReconciliationResult } from '../utils/reconciliation';
 import * as XLSX from 'xlsx';
@@ -8,6 +8,7 @@ interface VerificationDashboardProps {
     results: ReconciliationResult[];
     onUpdateResults: (newResults: ReconciliationResult[]) => void;
     onReset: () => void;
+    onSheetReset: () => void;
     onBack: () => void;
 }
 
@@ -15,6 +16,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
     results,
     onUpdateResults,
     onReset,
+    onSheetReset,
     onBack
 }) => {
     const [filter, setFilter] = useState<'ALL' | 'MISMATCH' | 'MISSING' | 'VERIFIED'>('ALL');
@@ -146,7 +148,14 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                             className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
                         >
                             <RotateCcw className="w-4 h-4 rotate-180" /> {/* Flip icon for back */}
-                            戻る
+                            列設定に戻る
+                        </button>
+                        <button
+                            onClick={onSheetReset}
+                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                        >
+                            <FileSpreadsheet className="w-4 h-4" />
+                            シート選択からやり直す
                         </button>
                         <button
                             onClick={onReset}
