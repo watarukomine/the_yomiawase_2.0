@@ -142,22 +142,21 @@ export const SheetSelector: React.FC<SheetSelectorProps> = ({
     };
 
     return (
-        <div className="max-w-5xl mx-auto w-full h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex-1 overflow-y-auto min-h-0 space-y-8 pb-4">
-                <div className="text-center space-y-2 mb-4">
-                    <h2 className="text-2xl font-bold text-slate-900">使用するシートを選択</h2>
-                    <p className="text-slate-500 text-sm">
-                        アップロードされたファイルに含まれるシート一覧です。照合に使用するシートをそれぞれ選択してください。
-                    </p>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-8">
-                    {renderFileList('master', masterFiles, masterParsedData, masterSelections)}
-                    {renderFileList('comparison', comparisonFiles, comparisonParsedData, comparisonSelections)}
-                </div>
+        <div className="max-w-5xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="text-center space-y-2 mb-8">
+                <h2 className="text-2xl font-bold text-slate-900">使用するシートを選択</h2>
+                <p className="text-slate-500 text-sm">
+                    アップロードされたファイルに含まれるシート一覧です。<br />
+                    照合に使用するシートをそれぞれ選択してください。
+                </p>
             </div>
 
-            <div className="flex justify-center gap-4 pt-4 border-t border-slate-100 mt-auto bg-slate-50/50 backdrop-blur-sm z-10 sticky bottom-0">
+            <div className="grid md:grid-cols-2 gap-8 mb-24">
+                {renderFileList('master', masterFiles, masterParsedData, masterSelections)}
+                {renderFileList('comparison', comparisonFiles, comparisonParsedData, comparisonSelections)}
+            </div>
+
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 flex justify-center gap-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40">
                 <button
                     onClick={onBack}
                     className="px-6 py-3 text-sm font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl transition-colors"

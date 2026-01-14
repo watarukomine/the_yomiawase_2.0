@@ -20,8 +20,8 @@ export const HeaderReview: React.FC<HeaderReviewProps> = ({
     onBack
 }) => {
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-full animate-in fade-in zoom-in-95 duration-300">
-            <div className="p-4 border-b border-slate-200 bg-slate-50">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col animate-in fade-in zoom-in-95 duration-300 mb-20">
+            <div className="p-6 border-b border-slate-200 bg-slate-50">
                 <h3 className="text-lg font-bold text-slate-900">{title} - ヘッダー位置の確認</h3>
                 <p className="text-sm text-slate-500 mt-1">
                     各ファイルで検出されたヘッダー行を確認してください。
@@ -30,7 +30,7 @@ export const HeaderReview: React.FC<HeaderReviewProps> = ({
                 </p>
             </div>
 
-            <div className="p-4 sm:p-6 overflow-auto flex-1 min-h-0">
+            <div className="p-6 flex-1">
                 <div className="space-y-4">
                     {files.map((file, index) => (
                         <div
@@ -79,7 +79,7 @@ export const HeaderReview: React.FC<HeaderReviewProps> = ({
                 </div>
             </div>
 
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-4">
+            <div className="p-6 border-t border-slate-200 bg-slate-50 flex justify-end gap-4 sticky bottom-0 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
                 <button
                     onClick={onBack}
                     className="px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors"
