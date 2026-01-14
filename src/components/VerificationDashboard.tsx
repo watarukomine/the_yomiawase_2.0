@@ -195,7 +195,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                         Toolbar is sticky top-16. Toolbar height approx 80px-90px. 
                         Let's try top-36 (144px) - header(64) = 80px relative. 
                      */}
-                    <thead className="bg-slate-50 text-slate-500 font-medium sticky top-32 z-10 shadow-sm">
+                    <thead className="bg-slate-50 text-slate-500 font-medium sticky top-[138px] z-10 shadow-sm">
                         <tr>
                             <th className="p-4 w-20 text-center">確認</th>
                             <th className="p-4">キー項目</th>
