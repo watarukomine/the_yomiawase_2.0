@@ -79,110 +79,112 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
 
     return (
         <div className="space-y-6 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">
-            {/* Summary Cards Section - Top of the flow, scrolls away */}
-            <div className="bg-slate-50 space-y-4 pt-1 pb-2">
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                        <p className="text-sm text-slate-500 font-medium">全データ件数</p>
-                        <p className="text-3xl font-bold text-slate-900 mt-1">{stats.total}</p>
-                    </div>
-                    <div className="bg-white p-5 rounded-xl border border-red-100 shadow-sm relative overflow-hidden">
-                        <div className="absolute right-0 top-0 p-3 opacity-10">
-                            <XCircle className="w-16 h-16 text-red-500" />
+            {/* Sticky Header Wrapper (Summary Cards + Toolbar) */}
+            <div className="sticky top-16 z-20 bg-slate-50 pb-2 -mt-2 pt-2 mb-2 shadow-sm border-b border-slate-100/50">
+                {/* Summary Cards Section */}
+                <div className="bg-slate-50 space-y-4 pt-1 pb-2 px-1">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <p className="text-sm text-slate-500 font-medium">全データ件数</p>
+                            <p className="text-3xl font-bold text-slate-900 mt-1">{stats.total}</p>
                         </div>
-                        <p className="text-sm text-red-600 font-bold">不一致 (要確認)</p>
-                        <p className="text-3xl font-bold text-red-700 mt-1">{stats.mismatched}</p>
-                    </div>
-                    <div className="bg-white p-5 rounded-xl border border-amber-100 shadow-sm relative overflow-hidden">
-                        <div className="absolute right-0 top-0 p-3 opacity-10">
-                            <AlertTriangle className="w-16 h-16 text-amber-500" />
+                        <div className="bg-white p-5 rounded-xl border border-red-100 shadow-sm relative overflow-hidden">
+                            <div className="absolute right-0 top-0 p-3 opacity-10">
+                                <XCircle className="w-16 h-16 text-red-500" />
+                            </div>
+                            <p className="text-sm text-red-600 font-bold">不一致 (要確認)</p>
+                            <p className="text-3xl font-bold text-red-700 mt-1">{stats.mismatched}</p>
                         </div>
-                        <p className="text-sm text-amber-600 font-bold">欠落データ</p>
-                        <p className="text-3xl font-bold text-amber-700 mt-1">{stats.missing}</p>
-                    </div>
-                    <div className="bg-white p-5 rounded-xl border border-purple-100 shadow-sm relative overflow-hidden">
-                        <div className="absolute right-0 top-0 p-3 opacity-10">
-                            <KeyRound className="w-16 h-16 text-purple-500" />
+                        <div className="bg-white p-5 rounded-xl border border-amber-100 shadow-sm relative overflow-hidden">
+                            <div className="absolute right-0 top-0 p-3 opacity-10">
+                                <AlertTriangle className="w-16 h-16 text-amber-500" />
+                            </div>
+                            <p className="text-sm text-amber-600 font-bold">欠落データ</p>
+                            <p className="text-3xl font-bold text-amber-700 mt-1">{stats.missing}</p>
                         </div>
-                        <p className="text-sm text-purple-600 font-bold">重複キー</p>
-                        <p className="text-3xl font-bold text-purple-700 mt-1">{stats.duplicate}</p>
-                    </div>
-                    <div className="bg-white p-5 rounded-xl border border-emerald-100 shadow-sm relative overflow-hidden">
-                        <div className="absolute right-0 top-0 p-3 opacity-10">
-                            <CheckCircle2 className="w-16 h-16 text-emerald-500" />
+                        <div className="bg-white p-5 rounded-xl border border-purple-100 shadow-sm relative overflow-hidden">
+                            <div className="absolute right-0 top-0 p-3 opacity-10">
+                                <KeyRound className="w-16 h-16 text-purple-500" />
+                            </div>
+                            <p className="text-sm text-purple-600 font-bold">重複キー</p>
+                            <p className="text-3xl font-bold text-purple-700 mt-1">{stats.duplicate}</p>
                         </div>
-                        <p className="text-sm text-emerald-600 font-bold">一致 / 確認済</p>
-                        <p className="text-3xl font-bold text-emerald-700 mt-1">{stats.verified + stats.matched}</p>
+                        <div className="bg-white p-5 rounded-xl border border-emerald-100 shadow-sm relative overflow-hidden">
+                            <div className="absolute right-0 top-0 p-3 opacity-10">
+                                <CheckCircle2 className="w-16 h-16 text-emerald-500" />
+                            </div>
+                            <p className="text-sm text-emerald-600 font-bold">一致 / 確認済</p>
+                            <p className="text-3xl font-bold text-emerald-700 mt-1">{stats.verified + stats.matched}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Sticky Toolbar Section - Sticks after Summary Cards scroll away */}
-            {/* Added mb-2 for '2mm' gap instruction */}
-            <div className="sticky top-16 z-20 bg-slate-50 pb-2 -mt-2 pt-2 mb-2">
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
-                    <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-                        {[
-                            { id: 'ALL', label: 'すべて' },
-                            { id: 'MISMATCH', label: '不一致のみ' },
-                            { id: 'MISSING', label: '欠落のみ' },
-                            { id: 'DUPLICATE', label: '重複のみ' },
-                            { id: 'VERIFIED', label: '確認済み' }
-                        ].map(f => (
-                            <button
-                                key={f.id}
-                                onClick={() => setFilter(f.id as any)}
-                                className={clsx(
-                                    "px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap",
-                                    filter === f.id
-                                        ? "bg-slate-800 text-white shadow-md"
-                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                )}
-                            >
-                                {f.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    <div className="flex gap-3 w-full md:w-auto">
-                        <div className="relative flex-1 md:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="キー項目で検索..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 rounded-lg border-slate-200 text-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors"
-                            />
+                {/* Toolbar Section */}
+                <div className="bg-slate-50 pb-1">
+                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+                        <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                            {[
+                                { id: 'ALL', label: 'すべて' },
+                                { id: 'MISMATCH', label: '不一致のみ' },
+                                { id: 'MISSING', label: '欠落のみ' },
+                                { id: 'DUPLICATE', label: '重複のみ' },
+                                { id: 'VERIFIED', label: '確認済み' }
+                            ].map(f => (
+                                <button
+                                    key={f.id}
+                                    onClick={() => setFilter(f.id as any)}
+                                    className={clsx(
+                                        "px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap",
+                                        filter === f.id
+                                            ? "bg-slate-800 text-white shadow-md"
+                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                    )}
+                                >
+                                    {f.label}
+                                </button>
+                            ))}
                         </div>
-                        <button
-                            onClick={onBack}
-                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
-                        >
-                            <RotateCcw className="w-4 h-4 rotate-180" />
-                            列設定に戻る
-                        </button>
-                        <button
-                            onClick={onSheetReset}
-                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
-                        >
-                            <FileSpreadsheet className="w-4 h-4" />
-                            シート選択からやり直す
-                        </button>
-                        <button
-                            onClick={onReset}
-                            className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
-                        >
-                            <RotateCcw className="w-4 h-4" />
-                            最初から
-                        </button>
-                        <button
-                            onClick={handleExport}
-                            className="px-4 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
-                        >
-                            <Download className="w-4 h-4" />
-                            結果を出力
-                        </button>
+
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <div className="relative flex-1 md:w-64">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input
+                                    type="text"
+                                    placeholder="キー項目で検索..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-9 pr-4 py-2 rounded-lg border-slate-200 text-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50 focus:bg-white transition-colors"
+                                />
+                            </div>
+                            <button
+                                onClick={onBack}
+                                className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                            >
+                                <RotateCcw className="w-4 h-4 rotate-180" />
+                                列設定に戻る
+                            </button>
+                            <button
+                                onClick={onSheetReset}
+                                className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                            >
+                                <FileSpreadsheet className="w-4 h-4" />
+                                シート選択からやり直す
+                            </button>
+                            <button
+                                onClick={onReset}
+                                className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                            >
+                                <RotateCcw className="w-4 h-4" />
+                                最初から
+                            </button>
+                            <button
+                                onClick={handleExport}
+                                className="px-4 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                            >
+                                <Download className="w-4 h-4" />
+                                結果を出力
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
