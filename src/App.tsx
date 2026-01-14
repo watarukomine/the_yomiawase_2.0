@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { FileSpreadsheet, ArrowRight, Check } from 'lucide-react';
+import { FileSpreadsheet, ArrowRight, Check, Book } from 'lucide-react';
 import { FileUpload } from './components/FileUpload';
 import { DataIngestion } from './components/DataIngestion';
 import { ColumnMapper, type MappingConfig } from './components/ColumnMapper';
 import { HeaderReview } from './components/HeaderReview';
 import { SheetSelector } from './components/SheetSelector';
 import { VerificationDashboard } from './components/VerificationDashboard';
+import { UserGuideModal } from './components/UserGuideModal';
 import { parseExcelFile, type SheetData } from './utils/excelParser';
 import { reconcileData, type ReconciliationResult } from './utils/reconciliation';
 import { clsx } from 'clsx';
@@ -23,6 +24,7 @@ const STEPS = [
 
 function App() {
   const [step, setStep] = useState<Step>('UPLOAD');
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   // File State
   const [masterFiles, setMasterFiles] = useState<File[]>([]);
@@ -277,6 +279,13 @@ function App() {
               <FileSpreadsheet className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-xl font-bold text-slate-800 tracking-tight">データ照合ツール</h1>
+            <button
+              onClick={() => setIsGuideOpen(true)}
+              className="ml-4 flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+            >
+              <Book className="w-4 h-4" />
+              使い方ガイド
+            </button>
           </div>
           {step !== 'UPLOAD' && (
             <button
@@ -467,6 +476,8 @@ function App() {
           />
         )}
       </main>
+
+      <UserGuideModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
     </div>
   );
 }
