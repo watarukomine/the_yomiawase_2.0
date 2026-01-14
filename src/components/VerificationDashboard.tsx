@@ -190,7 +190,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
             {/* Results List */}
             <div className="flex-1 overflow-auto bg-white rounded-xl border border-slate-200 shadow-sm min-h-0">
                 <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50 text-slate-500 font-medium sticky top-[138px] z-10 shadow-sm">
+                    <thead className="bg-slate-50 text-slate-500 font-medium z-10 shadow-sm border-b border-slate-200">
                         <tr>
                             <th className="p-4 w-20 text-center">確認</th>
                             <th className="p-4">キー項目</th>
