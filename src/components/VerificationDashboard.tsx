@@ -56,7 +56,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
 
     const handleExport = () => {
         const exportData = results.map(r => {
-            const row: any = {
+            const row: Record<string, string | number | boolean | null | undefined> = {
                 Key: r.key,
                 Status: r.status,
                 Verified: r.isVerified ? 'Yes' : 'No',
@@ -132,7 +132,7 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                             ].map(f => (
                                 <button
                                     key={f.id}
-                                    onClick={() => setFilter(f.id as any)}
+                                    onClick={() => setFilter(f.id as 'ALL' | 'MISMATCH' | 'MISSING' | 'DUPLICATE' | 'VERIFIED')}
                                     className={clsx(
                                         "px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap",
                                         filter === f.id
