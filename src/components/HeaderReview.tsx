@@ -20,7 +20,7 @@ export const HeaderReview: React.FC<HeaderReviewProps> = ({
     onBack
 }) => {
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-full max-h-[800px] animate-in fade-in zoom-in-95 duration-300">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-full animate-in fade-in zoom-in-95 duration-300">
             <div className="p-6 border-b border-slate-200 bg-slate-50">
                 <h3 className="text-lg font-bold text-slate-900">{title} - ヘッダー位置の確認</h3>
                 <p className="text-sm text-slate-500 mt-1">

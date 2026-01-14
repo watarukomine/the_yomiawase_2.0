@@ -22,7 +22,7 @@ export const DataIngestion: React.FC<DataIngestionProps> = ({ title, data, onCon
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full max-h-[600px] animate-in fade-in zoom-in-95 duration-300">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full animate-in fade-in zoom-in-95 duration-300">
             <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div>
                     <h3 className="text-lg font-bold text-slate-900">{title} のヘッダー行を選択</h3>
