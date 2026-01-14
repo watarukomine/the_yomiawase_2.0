@@ -206,7 +206,10 @@ function App() {
   const [masterProcessedData, setMasterProcessedData] = useState<any[]>([]);
   const [comparisonProcessedData, setComparisonProcessedData] = useState<any[]>([]);
 
+  const [mappingConfig, setMappingConfig] = useState<MappingConfig | undefined>(undefined);
+
   const handleMappingConfirm = (mapping: MappingConfig) => {
+    setMappingConfig(mapping);
     const res = reconcileData(masterProcessedData, comparisonProcessedData, mapping);
     setResults(res);
     setStep('RESULTS');
@@ -448,6 +451,7 @@ function App() {
           <ColumnMapper
             masterHeaders={masterHeaders}
             comparisonHeaders={comparisonHeaders}
+            initialConfig={mappingConfig}
             onConfirm={handleMappingConfirm}
             onBack={() => setStep('HEADER_COMPARISON')}
           />

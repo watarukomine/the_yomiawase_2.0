@@ -5,6 +5,7 @@ import { clsx } from 'clsx';
 interface ColumnMapperProps {
     masterHeaders: string[];
     comparisonHeaders: string[];
+    initialConfig?: MappingConfig;
     onConfirm: (mapping: MappingConfig) => void;
     onBack: () => void;
 }
@@ -22,14 +23,15 @@ export interface MappingConfig {
 export const ColumnMapper: React.FC<ColumnMapperProps> = ({
     masterHeaders,
     comparisonHeaders,
+    initialConfig,
     onConfirm,
     onBack
 }) => {
-    const [masterKey, setMasterKey] = useState<string>('');
-    const [comparisonKey, setComparisonKey] = useState<string>('');
-    const [valueMappings, setValueMappings] = useState<{ master: string; comparison: string }[]>([]);
-    const [treatMissingAsZero, setTreatMissingAsZero] = useState<boolean>(false);
-    const [duplicateHandling, setDuplicateHandling] = useState<DuplicateHandlingStrategy>('OVERWRITE');
+    const [masterKey, setMasterKey] = useState<string>(initialConfig?.masterKey || '');
+    const [comparisonKey, setComparisonKey] = useState<string>(initialConfig?.comparisonKey || '');
+    const [valueMappings, setValueMappings] = useState<{ master: string; comparison: string }[]>(initialConfig?.valueColumns || []);
+    const [treatMissingAsZero, setTreatMissingAsZero] = useState<boolean>(initialConfig?.treatMissingAsZero || false);
+    const [duplicateHandling, setDuplicateHandling] = useState<DuplicateHandlingStrategy>(initialConfig?.duplicateHandling || 'OVERWRITE');
 
     const handleAddValueMapping = () => {
         setValueMappings([...valueMappings, { master: '', comparison: '' }]);

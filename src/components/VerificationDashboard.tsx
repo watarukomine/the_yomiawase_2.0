@@ -79,8 +79,8 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
 
     return (
         <div className="space-y-6 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 sm:pb-0">
-            {/* Sticky Header Section */}
-            <div className="sticky top-0 z-20 bg-slate-50 space-y-4 pt-1 pb-2">
+            {/* Header Section (Not Sticky for Cards) */}
+            <div className="bg-slate-50 space-y-4 pt-1 pb-2">
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -116,8 +116,10 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
                         <p className="text-3xl font-bold text-emerald-700 mt-1">{stats.verified + stats.matched}</p>
                     </div>
                 </div>
+            </div>
 
-                {/* Toolbar */}
+            {/* Sticky Toolbar */}
+            <div className="sticky top-16 z-20 bg-slate-50 pb-2 -mt-2">
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
                     <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
                         {[
@@ -189,7 +191,11 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
             {/* Results List */}
             <div className="flex-1 overflow-auto bg-white rounded-xl border border-slate-200 shadow-sm min-h-0">
                 <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10 shadow-sm">
+                    {/* Header sticking below toolbar (64px header + ~88px toolbar = top-36/144px approx) 
+                        Toolbar is sticky top-16. Toolbar height approx 80px-90px. 
+                        Let's try top-36 (144px) - header(64) = 80px relative. 
+                     */}
+                    <thead className="bg-slate-50 text-slate-500 font-medium sticky top-32 z-10 shadow-sm">
                         <tr>
                             <th className="p-4 w-20 text-center">確認</th>
                             <th className="p-4">キー項目</th>
