@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { CheckCircle2, XCircle, AlertTriangle, Search, Check, Download, RotateCcw, FileSpreadsheet } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Search, Check, Download, RotateCcw, FileSpreadsheet, KeyRound } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { ReconciliationResult } from '../utils/reconciliation';
 import * as XLSX from 'xlsx';
