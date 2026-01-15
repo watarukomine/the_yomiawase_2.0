@@ -56,16 +56,25 @@ export const VerificationDashboard: React.FC<VerificationDashboardProps> = ({
 
     const handleExport = () => {
         const exportData = results.map(r => {
+            const statusMap: Record<string, string> = {
+                'MATCH': '一致',
+                'MISMATCH': '不一致',
+                'MISSING_IN_MASTER': '欠落 (マスターに無し)',
+                'MISSING_IN_COMPARISON': '欠落 (照合データに無し)',
+                'DUPLICATE_IN_MASTER': '重複 (マスター)',
+                'DUPLICATE_IN_COMPARISON': '重複 (照合データ)'
+            };
+
             const row: Record<string, string | number | boolean | null | undefined> = {
-                Key: r.key,
-                Status: r.status,
-                Verified: r.isVerified ? 'Yes' : 'No',
+                'キー': r.key,
+                '判定結果': statusMap[r.status] || r.status,
+                '確認済': r.isVerified ? '済' : '未',
             };
 
             r.diffs.forEach(d => {
-                row[`${d.columnName} (Master)`] = d.masterValue;
-                row[`${d.columnName} (Comparison)`] = d.comparisonValue;
-                row[`${d.columnName} (Match)`] = d.isMatch ? 'Yes' : 'No';
+                row[`${d.columnName} (正)`] = d.masterValue;
+                row[`${d.columnName} (副)`] = d.comparisonValue;
+                row[`${d.columnName} (一致)`] = d.isMatch ? '○' : '×';
             });
 
             return row;
