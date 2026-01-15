@@ -12,13 +12,15 @@ export const preprocessData = (
     data: any[],
     keyField: string,
     valueFields: string[],
-    strategy: DuplicateHandlingStrategy
+    strategy: DuplicateHandlingStrategy,
+    ignoreWhitespace: boolean = true
 ): PreprocessedData => {
     const groupedData: { [key: string]: any[] } = {};
 
     // 1. Group by Key
     data.forEach(row => {
-        const key = String(row[keyField] || '').replace(/\s+/g, '');
+        const keyVal = String(row[keyField] || '');
+        const key = ignoreWhitespace ? keyVal.replace(/\s+/g, '') : keyVal.trim();
         if (!key) return; // Skip empty keys
 
         if (!groupedData[key]) {

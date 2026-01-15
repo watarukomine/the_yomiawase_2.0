@@ -32,8 +32,8 @@ export const reconcileData = (
     const results: ReconciliationResult[] = [];
 
     // Preprocess data based on strategy
-    const masterGrouped = preprocessData(masterData, mapping.masterKey, mapping.valueColumns.map(c => c.master), mapping.duplicateHandling);
-    const comparisonGrouped = preprocessData(comparisonData, mapping.comparisonKey, mapping.valueColumns.map(c => c.comparison), mapping.duplicateHandling);
+    const masterGrouped = preprocessData(masterData, mapping.masterKey, mapping.valueColumns.map(c => c.master), mapping.duplicateHandling, mapping.ignoreWhitespace);
+    const comparisonGrouped = preprocessData(comparisonData, mapping.comparisonKey, mapping.valueColumns.map(c => c.comparison), mapping.duplicateHandling, mapping.ignoreWhitespace);
 
     // Get unique keys from preprocessed data
     const masterKeys = new Set(Object.keys(masterGrouped));
@@ -112,10 +112,18 @@ export const reconcileData = (
                 if (typeof mNum === 'number' && typeof cNum === 'number') {
                     isMatch = mNum === cNum;
                 } else {
-                    isMatch = String(mNum).replace(/\s+/g, '') === String(cNum).replace(/\s+/g, '');
+                    const mStr = String(mNum);
+                    const cStr = String(cNum);
+                    isMatch = mapping.ignoreWhitespace
+                        ? mStr.replace(/\s+/g, '') === cStr.replace(/\s+/g, '')
+                        : mStr.trim() === cStr.trim();
                 }
             } else {
-                isMatch = String(mVal ?? '').replace(/\s+/g, '') === String(cVal ?? '').replace(/\s+/g, '');
+                const mStr = String(mVal ?? '');
+                const cStr = String(cVal ?? '');
+                isMatch = mapping.ignoreWhitespace
+                    ? mStr.replace(/\s+/g, '') === cStr.replace(/\s+/g, '')
+                    : mStr.trim() === cStr.trim();
             }
 
             return {

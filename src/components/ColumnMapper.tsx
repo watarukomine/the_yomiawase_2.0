@@ -17,6 +17,7 @@ export interface MappingConfig {
     comparisonKey: string;
     valueColumns: { master: string; comparison: string }[];
     treatMissingAsZero?: boolean;
+    ignoreWhitespace?: boolean;
     duplicateHandling: DuplicateHandlingStrategy;
 }
 
@@ -31,6 +32,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
     const [comparisonKey, setComparisonKey] = useState<string>(initialConfig?.comparisonKey || '');
     const [valueMappings, setValueMappings] = useState<{ master: string; comparison: string }[]>(initialConfig?.valueColumns || []);
     const [treatMissingAsZero, setTreatMissingAsZero] = useState<boolean>(initialConfig?.treatMissingAsZero || false);
+    const [ignoreWhitespace, setIgnoreWhitespace] = useState<boolean>(initialConfig?.ignoreWhitespace ?? true);
     const [duplicateHandling, setDuplicateHandling] = useState<DuplicateHandlingStrategy>(initialConfig?.duplicateHandling || 'FLAG');
 
     const handleAddValueMapping = () => {
@@ -181,7 +183,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                                         name="duplicateHandling"
                                         value="FLAG"
                                         checked={duplicateHandling === 'FLAG'}
-                                        onChange={(e) => setDuplicateHandling(e.target.value as any)}
+                                        onChange={(e) => setDuplicateHandling(e.target.value as DuplicateHandlingStrategy)}
                                         className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
                                     />
                                     {/* Default is now FLAG, so maybe remove "(デフォルト)" text from Overwrite if present, or add it here? The user just said "Default to Duplicate Output". I will add "(推奨)" (Recommended) or similar if appropriate, but simply reordering is the main request. Let's just reorder for now and keep the "Default" text removed from Overwrite to avoid confusion since FLAG is now the state default. */}
@@ -204,7 +206,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                                         name="duplicateHandling"
                                         value="SUM"
                                         checked={duplicateHandling === 'SUM'}
-                                        onChange={(e) => setDuplicateHandling(e.target.value as any)}
+                                        onChange={(e) => setDuplicateHandling(e.target.value as DuplicateHandlingStrategy)}
                                         className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
                                     />
                                     <span className="font-bold text-slate-700">合算する</span>
@@ -226,7 +228,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                                         name="duplicateHandling"
                                         value="OVERWRITE"
                                         checked={duplicateHandling === 'OVERWRITE'}
-                                        onChange={(e) => setDuplicateHandling(e.target.value as any)}
+                                        onChange={(e) => setDuplicateHandling(e.target.value as DuplicateHandlingStrategy)}
                                         className="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
                                     />
                                     <span className="font-bold text-slate-700">上書き</span>
@@ -239,8 +241,22 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                     </div>
                 </div>
 
-                {/* Options Section */}
-                <div className="pt-4 border-t border-slate-100">
+                <div className="pt-4 border-t border-slate-100 flex flex-col gap-2">
+                    <label className="flex items-center gap-3 p-4 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors border border-transparent hover:border-slate-200">
+                        <div className="relative flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={ignoreWhitespace}
+                                onChange={(e) => setIgnoreWhitespace(e.target.checked)}
+                                className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                            />
+                        </div>
+                        <div>
+                            <span className="text-sm font-bold text-slate-700">空白を無視して比較する</span>
+                            <p className="text-xs text-slate-500 mt-0.5">「田中 太郎」と「田中太郎」のように、スペースの有無による違いを無視します。</p>
+                        </div>
+                    </label>
+
                     <label className="flex items-center gap-3 p-4 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors border border-transparent hover:border-slate-200">
                         <div className="relative flex items-center">
                             <input
@@ -266,7 +282,7 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
                     戻る
                 </button>
                 <button
-                    onClick={() => onConfirm({ masterKey, comparisonKey, valueColumns: valueMappings, treatMissingAsZero, duplicateHandling })}
+                    onClick={() => onConfirm({ masterKey, comparisonKey, valueColumns: valueMappings, treatMissingAsZero, ignoreWhitespace, duplicateHandling })}
                     disabled={!isValid}
                     className={clsx(
                         "px-8 py-3 text-sm font-bold text-white rounded-xl transition-all flex items-center gap-2 shadow-sm",
