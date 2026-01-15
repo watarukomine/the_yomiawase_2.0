@@ -18,7 +18,7 @@ export const preprocessData = (
 
     // 1. Group by Key
     data.forEach(row => {
-        const key = String(row[keyField] || '').trim();
+        const key = String(row[keyField] || '').replace(/\s+/g, '');
         if (!key) return; // Skip empty keys
 
         if (!groupedData[key]) {

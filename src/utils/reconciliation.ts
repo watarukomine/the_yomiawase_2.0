@@ -112,10 +112,10 @@ export const reconcileData = (
                 if (typeof mNum === 'number' && typeof cNum === 'number') {
                     isMatch = mNum === cNum;
                 } else {
-                    isMatch = String(mNum).trim() === String(cNum).trim();
+                    isMatch = String(mNum).replace(/\s+/g, '') === String(cNum).replace(/\s+/g, '');
                 }
             } else {
-                isMatch = String(mVal ?? '').trim() === String(cVal ?? '').trim();
+                isMatch = String(mVal ?? '').replace(/\s+/g, '') === String(cVal ?? '').replace(/\s+/g, '');
             }
 
             return {
