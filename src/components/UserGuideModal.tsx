@@ -98,6 +98,12 @@ export function UserGuideModal({ isOpen, onClose }: UserGuideModalProps) {
                                     <div>
                                         <strong className="text-slate-900 block mb-1">2. 照合する値の設定 (任意)</strong>
                                         キー以外に、内容が一致しているかチェックしたい列（金額、個数など）があれば追加します。
+                                        <div className="mt-2 pl-4 border-l-2 border-indigo-100 space-y-2">
+                                            <p className="text-sm">
+                                                <span className="font-bold text-slate-700">空白を無視して比較する:</span><br />
+                                                「田中 太郎」と「田中太郎」のようなスペースの違いを無視します。
+                                            </p>
+                                        </div>
                                     </div>
                                     <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
                                         <strong className="text-indigo-900 block mb-2 flex items-center gap-2">
